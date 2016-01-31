@@ -2,7 +2,7 @@
   "name": "GQ-core",
   "version": "1.0.0",
   "description": "QG项目的公共辅助库，提供了TCP封装以及一整套系统底层接口的拓展",
-  "main": "index.js",
+  "main": "exports.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
