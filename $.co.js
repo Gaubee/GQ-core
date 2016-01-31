@@ -1,0 +1,1 @@
+global.co = require("co");
