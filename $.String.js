@@ -24,8 +24,8 @@ String.prototype.setUnEnum("format", function(args) {
 	return result;
 });
 //解析成Object
-String.prototype.setUnEnum("parseJSON", function() {
-	return JSON.parse(this);
+String.prototype.setUnEnum("parseJSON", function(handle) {
+	return JSON.parse(this, handle);
 });
 
 String.prototype.setUnEnum("startWith", function(str) {

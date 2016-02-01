@@ -24,13 +24,13 @@ function _mix(sObj, nObj) {
 				}
 			}
 		}
-		var nojson_able_keys = sObj.__nojson_able_keys__;
-		if (nojson_able_keys instanceof Array) {
-			Object.defineProperty(nObj, "__nojson_able_keys__", {
-				enumerable: false,
-				value: nojson_able_keys
-			});
-		}
+		// var nojson_able_keys = sObj.__nojson_able_keys__;
+		// if (nojson_able_keys instanceof Array) {
+		// 	Object.defineProperty(nObj, "__nojson_able_keys__", {
+		// 		enumerable: false,
+		// 		value: nojson_able_keys
+		// 	});
+		// }
 		return sObj;
 	} else {
 		return nObj;
@@ -47,25 +47,25 @@ Object.mix = _mix;
 Object.prototype.setUnEnum("$mix", function(nObj) {
 	return _mix(this, nObj)
 });
-Object.deepClone = function (obj) {
+Object.deepClone = function(obj) {
 	return JSON.parse(JSON.stringify(obj));
 };
 Object.prototype.setUnEnum("$deepClone", function() {
 	return Object.deepClone(this)
 });
-Object.extend = function(instance, extendObj) {
-	var instance_proto = instance.__proto__;
-	instance = this.clone(instance);
-	var new_proto = Object.create(instance_proto);
-	Object.keys(extendObj).forEach(function(key) {
-		new_proto[key] = extendObj[key];
-	});
-	instance.__proto__ = new_proto;
-	return instance;
-};
-Object.prototype.setUnEnum("$extend", function(extendObj) {
-	return Object.extend(this, extendObj)
-});
+// Object.extend = function(instance, extendObj) {
+// 	var instance_proto = instance.__proto__;
+// 	instance = this.$clone(instance);
+// 	var new_proto = Object.create(instance_proto);
+// 	Object.keys(extendObj).forEach(function(key) {
+// 		new_proto[key] = extendObj[key];
+// 	});
+// 	instance.__proto__ = new_proto;
+// 	return instance;
+// };
+// Object.prototype.setUnEnum("$extend", function(extendObj) {
+// 	return Object.extend(this, extendObj)
+// });
 
 //多继承
 function multiInherits() {
@@ -137,6 +137,7 @@ Object.prototype.setUnEnum("$has", function(obj_small) {
 Object.prototype.setUnEnum("$multiInherits", multiInherits);
 Object.prototype.setUnEnum("$extends", multiInherits);
 Object.prototype.setUnEnum("$hasPro", Object.prototype.hasOwnProperty);
+Object.prototype.setUnEnum("HOP", Object.prototype.hasOwnProperty);
 
 Object._cci = {};
 Object.setCurrentContextItem = Object.setCci = function(key, value) {
@@ -161,3 +162,7 @@ Object.hangdownCurrentContext = Object.downCc = function(old_cci) {
 		Object._cci = current_cci;
 	});
 };
+
+Object.isObject = function(obj) {
+	return typeof obj === "object"
+}

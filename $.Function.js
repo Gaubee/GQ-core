@@ -34,3 +34,8 @@ Function.prototype.perm = Function.prototype.permission = function(matchFun, err
 Function.isFunction = function(foo) {
 	return typeof foo === "function";
 };
+var GeneratorFunction = Object.getPrototypeOf(function*() {}).constructor;
+
+Function.isGeneratorFunction = function(foo) {
+	return typeof foo === "function" && foo.constructor === GeneratorFunction;
+};

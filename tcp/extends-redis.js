@@ -1,12 +1,11 @@
 // client 拓展 出Redis指令
 exports.handleClient = handleClient;
-// require("./tcp").config.hidden_groups
-var tasks = exports.tasks = new Map();
 
 function handleClient(socket) {
+	var tasks = exports.redisTasks = new Map();
 	socket.redisExec = function(handle, args) {
-		var task_id = "REDIS-EXEC-TASK-ID-" + Math.random().toString(32).substr(2);
-		var p = new Promise(function(resolve, reject) {
+		var task_id = $$.uuid("REDIS-EXEC-TASK-ID-");
+		return new Promise(function(resolve, reject) {
 			tasks.set(task_id, {
 				resolve: resolve,
 				reject: reject
@@ -17,10 +16,9 @@ function handleClient(socket) {
 				args: args
 			});
 		});
-		return p
 	};
 	socket.onMsgSuccess("redis-return", function(data, done) {
-		console.log(data.info.task_id);
+		// console.log(data.info.task_id);
 		var task = tasks.get(data.info.task_id);
 		tasks.delete(data.info.task_id);
 		if (task) {
@@ -29,7 +27,7 @@ function handleClient(socket) {
 		done();
 	});
 	socket.onMsgError("redis-return", function(data, done) {
-		console.log(data.info.task_id);
+		// console.log(data.info.task_id);
 		var task = tasks.get(data.info.task_id);
 		tasks.delete(data.info.task_id);
 		if (task) {

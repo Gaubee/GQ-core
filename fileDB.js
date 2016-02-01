@@ -44,25 +44,25 @@ if (fs.existsSync(_db_root + "file_v2_db.js")) {
 //索引缓存文件
 var _index;
 
-// process.on('uncaughtException', function(err) {
-// 	console.info("进程未知错误，强行数据写入", err, err.stack);
-// 	foo.__storeIntoOneFile();
-// });
-
-// function _on_db_exit(type) {
-// 	return function() {
-// 		console.info("进程意外中断，强行数据写入", type);
-// 		foo.__storeIntoOneFile();
-// 		process.exit();
-// 	}
-// };
-// process.on('SIGHUP', _on_db_exit("SIGHUP"));
-// process.on('SIGINT', _on_db_exit("SIGINT"));
-// process.on('SIGQUIT', _on_db_exit("SIGQUIT"));
-// process.on('SIGABRT', _on_db_exit("SIGABRT"));
-// process.on('SIGTERM', _on_db_exit("SIGTERM"));
 var foo = {
 	autoBackup: function() {
+		process.on('uncaughtException', function(err) {
+			console.info("进程未知错误，强行数据写入", err, err.stack);
+			foo.__storeIntoOneFile();
+		});
+
+		function _on_db_exit(type) {
+			return function() {
+				console.info("进程意外中断，强行数据写入", type);
+				foo.__storeIntoOneFile();
+				process.exit();
+			}
+		};
+		process.on('SIGHUP', _on_db_exit("SIGHUP"));
+		process.on('SIGINT', _on_db_exit("SIGINT"));
+		process.on('SIGQUIT', _on_db_exit("SIGQUIT"));
+		process.on('SIGABRT', _on_db_exit("SIGABRT"));
+		process.on('SIGTERM', _on_db_exit("SIGTERM"));
 
 		setInterval(function() {
 			foo.__storeIntoOneFile("data.cache." + (new Date).format("yy-MM-dd[HH=mm=ss]") + ".json");

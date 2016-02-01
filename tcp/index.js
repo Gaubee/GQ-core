@@ -3,6 +3,7 @@ require("../$.generator");
 var ChunkHandle = require("./ChunkHandle");
 var msgHandle = require("./msg");
 var redisExtendHandle = require("./extends-redis.js");
+var routerExtendHandle = require("./extends-router.js");
 var net = require("net");
 exports.net = net;
 exports.handleSocket = handleSocket;
@@ -94,6 +95,13 @@ function createClient(address, callback) {
 	handleSocket(client);
 	//Model-Redis的拓展
 	redisExtendHandle.handleClient(client);
+	//Router拓展
+	routerExtendHandle.handleClient(client);
+	//删除没用的日志打印
+	var hiddenFlags = exports.config.hiddenFlags;
+	hiddenFlags.add("success:return-task");
+	hiddenFlags.add("success:router-register");
+	
 	return client;
 };
 exports.errorWrap = errorWrap;
