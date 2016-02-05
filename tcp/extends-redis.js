@@ -20,8 +20,8 @@ function handleClient(socket) {
 	socket.onMsgSuccess("redis-return", function(data, done) {
 		// console.log(data.info.task_id);
 		var task = tasks.get(data.info.task_id);
-		tasks.delete(data.info.task_id);
 		if (task) {
+			tasks.delete(data.info.task_id);
 			task.resolve(data.info.returns);
 		}
 		done();
@@ -29,8 +29,8 @@ function handleClient(socket) {
 	socket.onMsgError("redis-return", function(data, done) {
 		// console.log(data.info.task_id);
 		var task = tasks.get(data.info.task_id);
-		tasks.delete(data.info.task_id);
 		if (task) {
+			tasks.delete(data.info.task_id);
 			task.reject(data.msg);
 		}
 		done();

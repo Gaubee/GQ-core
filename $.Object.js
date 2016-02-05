@@ -138,6 +138,14 @@ Object.prototype.setUnEnum("$multiInherits", multiInherits);
 Object.prototype.setUnEnum("$extends", multiInherits);
 Object.prototype.setUnEnum("$hasPro", Object.prototype.hasOwnProperty);
 Object.prototype.setUnEnum("HOP", Object.prototype.hasOwnProperty);
+Object.prototype.setUnEnum("$toArray", function() {
+	var res = [];
+	var obj = this;
+	Object.keys(obj).forEach(function(key) {
+		res.push(obj[key])
+	});
+	return res;
+});
 
 Object._cci = {};
 Object.setCurrentContextItem = Object.setCci = function(key, value) {
@@ -164,5 +172,5 @@ Object.hangdownCurrentContext = Object.downCc = function(old_cci) {
 };
 
 Object.isObject = function(obj) {
-	return typeof obj === "object"
+	return typeof obj === "object" && obj !== null
 }

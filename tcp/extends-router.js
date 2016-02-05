@@ -15,13 +15,10 @@ function handleClient(socket) {
 		try {
 			var task_info = data.info;
 			var handle_id = `[${task_info.method.toLowerCase()}]${task_info.path}`;
-			if (!handles.has(handle_id)) { //路由处理函数丢失
-				throw new ReferenceError("RouterHandle no defined(找不到处理函数):" + handle_id)
-			} else {
+			if (handles.has(handle_id)) {
 				var router_handle = handles.get(handle_id);
 				yield router_handle.handle.call(new Context(socket, task_info, router_handle.config),
 					task_info, router_handle.config);
-				done();
 			}
 		} catch (e) {
 			console.error(console.flagHead("emit-task"),
@@ -34,8 +31,8 @@ function handleClient(socket) {
 				status: 502,
 				body: socket.TaskResponObj("error", "RouterHandle no defined")
 			});
-			done();
 		}
+		done();
 	}));
 
 	// 路由注册器

@@ -4,6 +4,8 @@ var ChunkHandle = require("./ChunkHandle");
 var msgHandle = require("./msg");
 var redisExtendHandle = require("./extends-redis.js");
 var routerExtendHandle = require("./extends-router.js");
+var appExtendHandle = require("./extends-app.js");
+var comExtendHandle = require("./extends-com.js");
 var net = require("net");
 exports.net = net;
 exports.handleSocket = handleSocket;
@@ -97,11 +99,17 @@ function createClient(address, callback) {
 	redisExtendHandle.handleClient(client);
 	//Router拓展
 	routerExtendHandle.handleClient(client);
+	//App拓展
+	appExtendHandle.handleClient(client);
+	//Component拓展
+	comExtendHandle.handleClient(client);
+
 	//删除没用的日志打印
 	var hiddenFlags = exports.config.hiddenFlags;
 	hiddenFlags.add("success:return-task");
 	hiddenFlags.add("success:router-register");
-	
+	hiddenFlags.add("success:component-register");
+
 	return client;
 };
 exports.errorWrap = errorWrap;

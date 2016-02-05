@@ -40,6 +40,9 @@ String.prototype.setUnEnum("endWith", function(str) {
 String.isString = function(str) {
 	return typeof str === "string";
 };
+String.asString = function(str) {
+	return typeof str === "string" ? str : "";
+};
 
 //转驼峰
 String.prototype.setUnEnum("camelize", function() {
@@ -136,4 +139,39 @@ String.toRegExp = function(str) {
 		str = new RegExp(String(str).replace(matchOperatorsRe, '\\$&'));
 	}
 	return str
-}
+};
+
+// 字符串转通用描述对象
+String.toDoc = function(str) {
+	var name;
+	var type;
+	var des;
+	var doc = {};
+
+	var res_str = str;
+	var des_index = res_str.indexOf(":");
+	if (des_index !== -1) {
+		des = res_str.substr(des_index + 1);
+		res_str = res_str.substr(0, des_index);
+	}
+
+	var type_index = res_str.indexOf("|");
+	if (type_index !== -1) {
+		type = res_str.substr(type_index + 1);
+		res_str = res_str.substr(0, type_index);
+	}
+
+	if (res_str) {
+		name = res_str;
+	}
+
+	name && (doc.name = name);
+	type && (doc.type = type);
+	des && (doc.des = des);
+
+	return doc;
+};
+
+String.prototype.setUnEnum("$toDoc", function() {
+	return String.toDoc(this);
+});

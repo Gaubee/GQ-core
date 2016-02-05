@@ -146,12 +146,15 @@ Array.prototype.setUnEnum("sortBy", function(key, asc) {
 // console.log(arr);
 
 Array.toMap = function(arr, key) {
-	var res = Object.create(null);
+	var res = {};
 	arr.forEach(function(item) {
-		res[item[key]] = item
+		item.$hasPro(key) && (res[item[key]] = item);
 	});
 	return res
 };
 Array.prototype.setUnEnum("toMap", function(key) {
 	return Array.toMap(this, key);
 });
+Array.asArray = function(arr) {
+	return Array.isArray(arr) ? arr : [];
+};

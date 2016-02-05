@@ -6,6 +6,7 @@ var error_map = {
 	"eval": EvalError,
 	"range": RangeError,
 	"reference": ReferenceError,
+	"ref": ReferenceError,
 	"syntax": SyntaxError,
 	"type": TypeError,
 	"uri": URIError,
