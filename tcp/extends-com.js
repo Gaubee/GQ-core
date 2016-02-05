@@ -2,6 +2,15 @@
 exports.handleClient = handleClient;
 
 function handleClient(socket) {
+	registerComponent(socket);
+	initComponent(socket);
+};
+
+exports.registerComponent = registerComponent;
+/*
+ * 注册组件，以及响应组件实例的生成
+ */
+function registerComponent(socket) {
 	var components = new Map();
 	var tasks = new Map();
 
@@ -64,17 +73,17 @@ function handleClient(socket) {
 
 		/*生成InitProtos-DOC*/
 		if (Function.isFunction(com)) {
-			components.set(com_name, com);
 			doc.init_protos = getParamsDoc(com, doc.init_protos);
 
 			if (Function.isClass(com)) {
 				method_obj = com.prototype;
 			}
 		} else if (Object.isObject(com)) {
-			components.set(com_name, com);
 			method_obj = com;
 			prototype_obj = com;
 		}
+		// components.set(com_name, com); // after success.
+
 		var no_as_com_protos = Array.asArray(com.__no_as_com_proto_list__);
 
 		/*分析源码，生成Methods-DOC*/
@@ -147,7 +156,9 @@ function handleClient(socket) {
 			});
 			tasks.set(com_name, {
 				reslove: reslove,
-				reject: reject
+				reject: reject,
+				com: com,
+				doc: doc
 			});
 		});
 	};
@@ -156,7 +167,11 @@ function handleClient(socket) {
 		var task = tasks.get(com_name);
 		if (task) {
 			tasks.delete(com_name);
-			task.reslove(data.info)
+			components.set(com_name, {
+				com: task.com,
+				doc: task.doc
+			});
+			task.reslove(data.info);
 		}
 		done();
 	});
@@ -168,5 +183,90 @@ function handleClient(socket) {
 			task.reject(data.msg)
 		}
 		done()
+	});
+	// on init component
+	// 从服务端发来的，所以已经确保和register的数据是同步了，com_name是在Server校验过的。
+	socket.onMsgInfo("init-component", function(data, done) {
+		var task_id = data.info.task_id;
+		var com_name = data.info.com_name;
+		console.flag("on init component", data.info)
+		var com_and_doc = components.get(com_name);
+		if (com_and_doc) {
+			socket.msgSuccess("init-component", {
+				task_id: task_id,
+				protos: com_and_doc.doc.methods.toMap("name")
+			});
+		} else {
+			socket.msgError("init-component", {
+				task_id: task_id
+			}, "lost Component-Constructor<" + com_name + ">")
+		}
+		done();
+	});
+};
+
+exports.initComponent = initComponent;
+/*
+ * 使用组件
+ * Client->Server-Client通用
+ */
+function initComponent(socket, is_server) {
+	var init_com_tasks = new Map();
+	if (is_server) {
+		socket.callInitComponent = function(task_id, com_name, init_protos) {
+			var info = {};
+			info.task_id = task_id;
+			info.init_protos = init_protos;
+			info.com_name = com_name;
+
+			return new Promise(function(reslove, reject) {
+				socket.msgInfo("init-component", info);
+				init_com_tasks.set(info.task_id, {
+					reslove: reslove,
+					reject: reject,
+				});
+			});
+		};
+	} else {
+		socket.initComponent = function(app_name, com_name, init_protos) {
+			var info = {};
+			if (arguments.length < 3) {
+				init_protos = com_name;
+				com_name = app_name;
+				app_name = null;
+			} else {
+				info.app_name = app_name;
+			}
+			info.task_id = $$.uuid("CLIENT-TASK-ID@");
+			info.init_protos = init_protos;
+			info.com_name = com_name;
+
+			return new Promise(function(reslove, reject) {
+				socket.msgInfo("init-component", info);
+				init_com_tasks.set(info.task_id, {
+					reslove: reslove,
+					reject: reject,
+				});
+			});
+		};
+	}
+	socket.onMsgSuccess("init-component", function(data, done) {
+		var task_id = data.info && data.info.task_id;
+		var task = init_com_tasks.get(task_id);
+		if (task) {
+			init_com_tasks.delete(task_id);
+			task.reslove(data.info);
+		}
+		done();
+	});
+
+	socket.onMsgError("init-component", function(data, done) {
+		var task_id = data.info && data.info.task_id;
+		var task = init_com_tasks.get(task_id);
+		if (task) {
+			init_com_tasks.delete(task_id);
+			task.reject(data.msg);
+		}
+		done();
 	});
 };

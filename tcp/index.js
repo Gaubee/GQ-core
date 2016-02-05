@@ -80,7 +80,7 @@ function handleSocket(socket, options) {
 exports.createServer = createServer;
 
 function createServer(address, callback) {
-	var server = net.createServer(function(socket) {
+	var server = net.createServer(function(socket) { // on("connection")
 		socket._id || (socket._id = "SOCKET@" + Math.random().toString(16).substr(2));
 		handleSocket(socket);
 	});

@@ -71,7 +71,7 @@ function ChunkHandle(socket) {
 				_buffer_cache = [];
 				return;
 			}
-			socket.emit("msg", result);
+			socket.emit("msg", result, _result_str);
 		}
 	};
 	return chuck_handle;
