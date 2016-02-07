@@ -81,6 +81,11 @@ yield socket.registerComponent("QAQ", {
 });
 ```
 
+> 关于异步方法：对于异步，我们统一使用Promise对象来做判断，因为Promise没有序列化成JSON的意义。
+意味着，如果返回的对象是一个[co:Yieldables](//github.com/tj/co#yieldables)对象，会等到所有Promise执行完成最终执行返回。
+这点也适用于Function类型的构造器。所以如果Class类型的构造器的构造函数也用到了异步，可以用Function进行包裹，然后使用`socket.buildComponentDoc([doc, ]com)`来手动生成文档并传入。
+
+
 ### socket.initComponent([application_name, ]component_name, [...args]);
 
 application_name如果是处于同一个应用中，可省略不写。

@@ -83,6 +83,13 @@ function createServer(address, callback) {
 	var server = net.createServer(function(socket) { // on("connection")
 		socket._id || (socket._id = "SOCKET@" + Math.random().toString(16).substr(2));
 		handleSocket(socket);
+
+		//删除没用的日志打印
+		var hiddenFlags = exports.config.hiddenFlags;
+		hiddenFlags.add("router-register");
+		hiddenFlags.add("success:init-component");
+		hiddenFlags.add("success:order-component");
+
 	});
 	if (address) {
 		server.listen(address, callback)
@@ -109,6 +116,8 @@ function createClient(address, callback) {
 	hiddenFlags.add("success:return-task");
 	hiddenFlags.add("success:router-register");
 	hiddenFlags.add("success:component-register");
+	hiddenFlags.add("success:init-component");
+	hiddenFlags.add("success:order-component");
 
 	return client;
 };

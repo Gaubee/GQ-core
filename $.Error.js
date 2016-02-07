@@ -37,3 +37,7 @@ String.prototype.setUnEnum("$toError", function(type) {
 	err.stack = stack_arr.join("\n");
 	return err;
 });
+
+Error.isError = function(err) {
+	return util.isError(err);
+};

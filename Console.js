@@ -3,6 +3,7 @@ require("./$.Array");
 require("./$.Object");
 require("./$.String");
 var util = require("util")
+var color_flag_reg = /^(\u001b\[\d+m)[\s\S]+?(\u001b\[\d+m)/;
 
 function Console() {
 	this.before = [];
@@ -79,17 +80,33 @@ Console.prototype = {
 		_console.log.apply(_console, args);
 		this.before.pop();
 	},
-	group: function() {
-		this.before.push("┌ ");
+	group: function(may_be_flag) {
+		var color_start = "";
+		var color_end = "";
+		if (String.isString(may_be_flag)) {
+			var color_wrap = may_be_flag.match(color_flag_reg);
+			if (color_wrap) {
+				color_start = color_wrap[1];
+				color_end = color_wrap[2];
+			}
+		}
+		this.before.push(color_start + "┌ " + color_end);
 		var args = this.addBefore(arguments);
 		_console.log.apply(_console, args);
 
 		this.before.pop();
-		this.before.push("│ ");
+		this.before.push(color_start + "│ " + color_end);
 	},
 	groupEnd: function() {
-		this.before.pop();
-		this.before.push("└ ");
+		var group_flag = this.before.pop();
+		var color_start = "";
+		var color_end = "";
+		var color_wrap = group_flag.match(color_flag_reg);
+		if (color_wrap) {
+			color_start = color_wrap[1];
+			color_end = color_wrap[2];
+		}
+		this.before.push(color_start + "└ " + color_end);
 		var args = this.addBefore(arguments);
 		_console.log.apply(_console, args);
 		this.before.pop();

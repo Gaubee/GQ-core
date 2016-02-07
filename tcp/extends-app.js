@@ -7,7 +7,7 @@ function handleClient(socket) {
 		var task = tasks.get(data.info.app_name);
 		if (task) {
 			tasks.delete(data.info.app_name);
-			task.reslove(data.info);
+			task.resolve(data.info);
 		}
 	});
 
@@ -22,9 +22,9 @@ function handleClient(socket) {
 		if (!(user_name && password && app_name)) {
 			throw "user_name, password, app_name could not be empty";
 		}
-		return new Promise(function(reslove, reject) {
+		return new Promise(function(resolve, reject) {
 			tasks.set(app_name, {
-				reslove: reslove,
+				resolve: resolve,
 				reject: reject
 			});
 			socket.msgInfo("use-app", {
