@@ -98,12 +98,35 @@ console.log(yield com.say());
 console.log(yield com.word);
 ```
 
-### socket.destroyComponent / socket.deleteComponent(component_instance) / component_instance("delete"/"destroy")
+### socket.destroyComponent(component_instance/task_id, destroy_args: Array) / component_instance.destroy([...destroy_args])
 
-这里提供了三种方法来执行销毁组件对象。前面两种是直观的，二者只是一个重命名的关系。
-最后一种是js一个语法糖。在JS中，Function也是一个Object，所以提供了这种**指令化**的方案。
+这里提供了两种方法来执行销毁组件对象。前者是直接调用，后者在内部调用前者。
+注意，这里`component_instance.destroy`绑定在`component_instance`原型链上，如果你注册了同名方法或者属性，需要用`component_instance.__proto__.destroy`才能访问到这个方法。
+
+destroy_args指的是组件销毁函数接受的参数。销毁函数和构造函数一样都不会被注册到`component_instance`指令中，而是分别通过`init-component`和`destroy-component`调用。
+
+#### socket.destroy_symbol
+组件如何书写销毁函数：
+```js
+com_instance[socket.destroy_symbol] = function () {}
+```
+这里socket.destroy_symbol是一个ES6的Symbol对象，也正因如此，这个对象是不会被`registerComponent`获取到。同理，在Class类型组件中：
+```js
+class ClassName {
+	constructor() {
+
+	}
+	[socket.destroy_symbol](word){
+		return "destroy-success:" + word
+	}
+}
+```
+调用者：
+```js
+console.log(yield component_instance.destroy("OK!")); // destroy-success:OK!
+```
 
 ### 关于指令化
-> `socket.initComponent`返回的就是一个可运行指令的函数，组件的属性、方法只是绑定在这个函数上的转发函数。
+> `socket.initComponent`返回的就是一个可运行指令的**函数**，组件的属性、方法只是绑定在这个函数上的转发函数。
 比如设置属性值：`component_instance("set", key, value)`，指令是用户自定义的。组件只是一个运行指令的容器。所以在本质上，开发者可以开发出各种组件，即便是远程运行代码也不是不行。
 只是在Nodejs版本的`GQ-core`中，综合了效率、学习代价等因素，给出了这套体系。
