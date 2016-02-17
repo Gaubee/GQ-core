@@ -7,6 +7,7 @@ function handleClient(socket) {
 	registerComponent(socket);
 	initComponent(socket);
 	orderComponent(socket);
+	destroyComponent(socket);
 };
 
 /*
@@ -162,6 +163,8 @@ exports.registerComponent = registerComponent;
 /*
  * 注册组件，以及响应组件实例的生成
  */
+var destroy_GQ_component_symbol = Symbol("destroy-GQ-component");
+
 function registerComponent(socket) {
 	var components = socket.registeredComponents = new Map();
 	var tasks = new Map();
@@ -254,7 +257,7 @@ function registerComponent(socket) {
 				protos: protos
 			});
 		} catch (err) {
-			console.flag("init-component", err.message, "\n", err.stack);
+			console.flag("init-component", err);
 			socket.msgError("init-component", {
 				task_id: safe_task_id
 			}, Error.isError(err) ? err.message : err);
@@ -268,8 +271,10 @@ function registerComponent(socket) {
 
 	// 根据safe_task_id获取沙盒环境上下文对象
 	socket.onMsgInfo("order-component", function(data, done) {
+		var info = data.info;
+		var safe_task_id = info.task_id;
+		var safe_order_id = info.order_id;
 		co(function*() {
-			var safe_task_id = data.info.task_id;
 			if (!safe_task_id) {
 				Throw("ref", "safe_task_id must be Unique-String.");
 			}
@@ -277,12 +282,11 @@ function registerComponent(socket) {
 			if (!com_sandbox) {
 				Throw("ref", "safe_task_id has no reference to sandbox.");
 			}
-			var safe_order_id = data.info.order_id;
 			if (!safe_order_id) {
 				Throw("ref", "safe_order_id must be Unique-String.");
 			}
 
-			var order = String.asString(data.info.order);
+			var order = String.asString(info.order);
 			if (!order) {
 				Throw("type", "order must be String.");
 			}
@@ -292,7 +296,7 @@ function registerComponent(socket) {
 			if (!order_handle || order_handle.types.indexOf(com_sandbox.type) === -1) {
 				Throw("type", "Can not find " + com_sandbox.type + "'s order: " + order);
 			}
-			var order_res = yield order_handle.handle(com_sandbox, data.info.data);
+			var order_res = yield order_handle.handle(com_sandbox, info.data);
 
 			socket.msgSuccess("order-component", {
 				task_id: safe_task_id,
@@ -301,10 +305,51 @@ function registerComponent(socket) {
 			});
 			done();
 		}).catch(err => {
-			console.flag("order-component", err.message, "\n", err.stack);
+			console.flag("error:order-component", err);
 			socket.msgError("order-component", {
 				task_id: safe_task_id,
 				order_id: safe_order_id,
+			}, Error.isError(err) ? err.message : err);
+			done();
+		});
+	});
+
+	/*
+	 * on destroy component
+	 */
+	socket.destroy_symbol = destroy_GQ_component_symbol;
+	socket.onMsgInfo("destroy-component", function(data, done) {
+		var info = data.info || {};
+		var safe_task_id = info.task_id;
+		co(function*() {
+			if (!safe_task_id) {
+				Throw("ref", "safe_task_id must be Unique-String.");
+			}
+			var com_sandbox = componentSandboxFactory.get(safe_task_id);
+			if (!com_sandbox) {
+				Throw("ref", "safe_task_id has no reference to sandbox.");
+			}
+
+			// 如果有定义销毁函数，执行销毁函数
+			var destroy_handle = com_sandbox.com_instance[destroy_GQ_component_symbol];
+			if (Function.isFunction(destroy_handle)) {
+				var destroy_returns = destroy_handle.apply(com_sandbox.com_instance, Array.asArray(info.destroy_args));
+			}
+
+			// 销毁沙盒对象，释放内存
+			Object.keys(com_sandbox).forEach(function(key) {
+				delete com_sandbox[key]
+			});
+			componentSandboxFactory.delete(safe_task_id);
+
+			socket.msgSuccess("destroy-component", {
+				task_id: safe_task_id,
+				destroy_returns: destroy_returns,
+			});
+			done();
+		}).catch(err => {
+			socket.msgError("destroy-component", {
+				task_id: safe_task_id,
 			}, Error.isError(err) ? err.message : err);
 			done();
 		});
@@ -316,6 +361,8 @@ exports.initComponent = initComponent;
  *  初始化组件
  * Client->Server-Client通用
  */
+var com_instance_proxy_symbol = Symbol("com-instance-proxy");
+
 function initComponent(socket, is_server) {
 	var init_com_tasks = new Map();
 	if (is_server) {
@@ -360,31 +407,71 @@ function initComponent(socket, is_server) {
 					reject: reject,
 				});
 			}).then(function(com_instance) {
-				var com_instance_proxy = function(order, data) {
-					return socket.orderComponent(info.task_id, order, data);
+				var order_tasks = [];
+				var send_order = function(order, data) {
+					var p = socket.orderComponent(info.task_id, order, data);
+
+					order_tasks.push(p);
+
+					return p.then(function(res) {
+						order_tasks.spliceRemove(p)
+						return res;
+					}).catch(function(err) {
+						order_tasks.spliceRemove(p);
+						if (!Error.isError(err)) { // 组件服务商的返回的错误是一个字符串，需要进一步的封装成Error对象
+							err = new Error(err);
+							var stack_info = err.stack.split("\n");
+							stack_info.splice(1, 0, `    at [GQ-COMPONENT]${info.app_name||socket.using_app&&socket.using_app.app_name}:${info.com_name}:${order}`);
+							err.stack = stack_info.join("\n")
+						}
+						throw err;
+					});
 				};
+
+				function com_instance_proxy(order, data) {
+					if (!order) {
+						return order_tasks;
+					}
+					return send_order(order, data)
+				};
+				var _proto_ = {
+					task_id: info.task_id,
+					[com_instance_proxy_symbol]: true,
+					destroy: function() {
+						return socket.destroyComponent(_proto_.task_id, Array.slice(arguments)).then(function(info) {
+							console.log(info)
+							return info.destroy_returns;
+						});
+					}
+				};
+				com_instance_proxy.__proto__ = _proto_;
 				com_instance.protos.methods.forEach(key => {
 					function component_proxy_method_runner() {
-						return com_instance_proxy("run-method", {
+						return send_order("run-method", {
 							name: key,
 							args: Array.slice(arguments)
 						});
 					}
-					com_instance_proxy.__defineGetter__(key, () => {
-						return component_proxy_method_runner
+					Object.defineProperty(com_instance_proxy, key, {
+						get: () => {
+							return component_proxy_method_runner
+						}
 					});
 				});
 				com_instance.protos.properties.forEach(key => {
-					com_instance_proxy.__defineGetter__(key, () => {
-						return com_instance_proxy("get-property", key);
-					});
-					com_instance_proxy.__defineSetter__(key, value => {
-						return com_instance_proxy("set-property", {
-							key: key,
-							value: value
-						});
+					Object.defineProperty(com_instance_proxy, key, {
+						get: () => {
+							return send_order("get-property", key);
+						},
+						set: value => {
+							return send_order("set-property", {
+								key: key,
+								value: value
+							});
+						}
 					});
 				});
+				Object.freeze(com_instance_proxy);
 				return com_instance_proxy;
 			});
 		};
@@ -479,4 +566,61 @@ function orderComponent(socket, is_server) {
 		}
 		done();
 	});
-}
+};
+
+exports.destroyComponent = destroyComponent;
+/*
+ * 销毁组件
+ * Client->Server-Client通用
+ */
+function destroyComponent(socket, is_server) {
+	var destroy_tasks = new Map();
+	if (is_server) {
+		socket.callDestroyComponent = function(info) {
+			return new Promise(function(resolve, reject) {
+				socket.msgInfo("destroy-component", info);
+				destroy_tasks.set(info.task_id, {
+					resolve: resolve,
+					reject: reject,
+				});
+			});
+		};
+	} else {
+		socket.destroyComponent = function(task_id, destroy_args) {
+			if (Function.isFunction(task_id) && task_id.__proto__[com_instance_proxy_symbol]) {
+				task_id = task_id.__proto__.task_id;
+			} else if (!String.isString(task_id)) {
+				Throw("type", "arguments error, must be an 'task_id' or 'com_instance_proxy'.")
+			}
+			return new Promise(function(resolve, reject) {
+				socket.msgInfo("destroy-component", {
+					task_id: task_id,
+					destroy_args: destroy_args
+				});
+				destroy_tasks.set(task_id, {
+					resolve: resolve,
+					reject: reject,
+				});
+			});
+		}
+	}
+	socket.onMsgSuccess("destroy-component", function(data, done) {
+		var task_id = data.info && data.info.task_id;
+		var task = destroy_tasks.get(task_id);
+		if (task) {
+			destroy_tasks.delete(task_id);
+			task.resolve(data.info);
+		}
+		done();
+	});
+
+	socket.onMsgError("destroy-component", function(data, done) {
+		var task_id = data.info && data.info.task_id;
+		var task = destroy_tasks.get(task_id);
+		if (task) {
+			destroy_tasks.delete(task_id);
+			task.reject(data.msg);
+		}
+		done();
+	});
+};

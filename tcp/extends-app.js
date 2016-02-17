@@ -32,6 +32,8 @@ function handleClient(socket) {
 				password: password,
 				app_name: app_name,
 			});
-		});
+		}).then(app_info => {
+			return socket.using_app = app_info;
+		})
 	});
 };

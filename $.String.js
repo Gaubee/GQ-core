@@ -175,3 +175,36 @@ String.toDoc = function(str) {
 String.prototype.setUnEnum("$toDoc", function() {
 	return String.toDoc(this);
 });
+
+
+// 获取字符串在控制台中的长度
+/*
+Block                                   Range       Comment
+CJK Unified Ideographs                  4E00-9FFF   Common
+CJK Unified Ideographs Extension A      3400-4DFF   Rare
+CJK Unified Ideographs Extension B      20000-2A6DF Rare, historic
+CJK Compatibility Ideographs            F900-FAFF   Duplicates, unifiable variants, corporate characters
+CJK Compatibility Ideographs Supplement 2F800-2FA1F Unifiable variants
+ */
+var cjk = function(char_code) {
+	return 0x4E00 <= char_code && char_code <= 0x9FFF ||
+		0x3400 <= char_code && char_code <= 0x4DFF ||
+		0x20000 <= char_code && char_code <= 0x2A6DF ||
+		0xF900 <= char_code && char_code <= 0xFAFF ||
+		0x2F800 <= char_code && char_code <= 0x2FA1F;
+}
+String.getConsoleRange = function(str) {
+	var res = 0;
+	for (var i = 0, len = str.length, cc; i < len; i += 1) {
+		console.log(`[${str[i]}]`)
+		cc = str.charCodeAt(i);
+		if (cc === 9) {
+			res += 8 - res % 8
+		} else if (cjk(cc)) {
+			res += 2
+		} else {
+			res += 1
+		}
+	}
+	return res;
+};

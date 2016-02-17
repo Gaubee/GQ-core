@@ -58,6 +58,9 @@ class ComponentSandboxFactory {
 	get(safe_task_id) {
 		return this.sandboxsMap.get(safe_task_id);
 	}
+	delete(safe_task_id){
+		return this.sandboxsMap.delete(safe_task_id);
+	}
 };
 
 exports.ComponentSandboxFactory = ComponentSandboxFactory;
@@ -76,11 +79,46 @@ componentSandboxOrders["run-method"] = {
 		}
 
 		var com_instance = sandbox.com_instance;
+
 		var res = com_instance[name].apply(com_instance, args);
 		if (!(res instanceof Promise)) {
 			res = Promise.resolve(res);
 		}
 		return res
+	}
+};
+componentSandboxOrders["set-property"] = {
+	types: ["class", "function", "object"],
+	handle: function(sandbox, data) {
+		var key = data.key;
+		var value = data.value;
+		if (!String.isString(key)) {
+			Throw("type", "key must be String");
+		}
+
+		var com_instance = sandbox.com_instance;
+
+		var res = com_instance[key] = value;
+		if (!(res instanceof Promise)) {
+			res = Promise.resolve(res);
+		}
+		return res;
+	}
+};
+componentSandboxOrders["get-property"] = {
+	types: ["class", "function", "object"],
+	handle: function(sandbox, key) {
+		if (!String.isString(key)) {
+			Throw("type", "key must be String");
+		}
+
+		var com_instance = sandbox.com_instance;
+
+		var res = com_instance[key];
+		if (!(res instanceof Promise)) {
+			res = Promise.resolve(res);
+		}
+		return res;
 	}
 };
 
