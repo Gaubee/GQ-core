@@ -439,7 +439,6 @@ function initComponent(socket, is_server) {
 					[com_instance_proxy_symbol]: true,
 					destroy: function() {
 						return socket.destroyComponent(_proto_.task_id, Array.slice(arguments)).then(function(info) {
-							console.log(info)
 							return info.destroy_returns;
 						});
 					}
