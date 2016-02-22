@@ -65,10 +65,10 @@ function handleSocket(socket, options) {
 	});
 	// 错误处理
 	socket.on("error", function(e) {
-		console.flag("TCP ERROR", socket._id, e.stack);
+		console.flag("TCP ERROR", socket._id, e);
 	});
 	socket.on("close", function(e) {
-		console.flag("TCP CLOSE", socket._id, e);
+		console.flag("TCP CLOSE", socket._id);
 	});
 
 	// 封装msg事件
