@@ -2,8 +2,9 @@ require("./$.Date");
 require("./$.Array");
 require("./$.Object");
 require("./$.String");
-var util = require("util")
-var color_flag_reg = /(\u001b\[\d+m)([\s\S]+?)(\u001b\[\d+m)/; //不以^开头，前面可能有空格
+const util = require("util");
+const colors = require("colors");
+const color_flag_reg = /(\u001b\[\d+m)([\s\S]+?)(\u001b\[\d+m)/; //不以^开头，前面可能有空格
 
 function Console() {
 	this.before = [];
@@ -16,9 +17,10 @@ function Console() {
 		}
 	}
 };
-var _console = global.console;
+const _console = global.console;
 
 global.nactive_console = _console;
+global.Console = Console;
 
 Console.replaceColorContent = function(str, replacer) {
 	if (color_flag_reg.test(str)) {
@@ -30,6 +32,14 @@ Console.replaceColorContent = function(str, replacer) {
 	}
 	return replacer;
 };
+// Color Symbol
+const COLOR_ENUM = Console.COLOR = {};
+const COLOR_MAP = new Map();
+Object.keys(colors.styles).filter(key => {
+	var sym = COLOR_ENUM[key] = Symbol(key);
+	COLOR_MAP.set(sym, colors.styles[key])
+});
+
 Console.prototype = {
 	addBefore: function(arr) {
 		arr = Array.slice(arr);
@@ -96,7 +106,12 @@ Console.prototype = {
 	group: function(may_be_flag) {
 		var color_start = "";
 		var color_end = "";
-		if (String.isString(may_be_flag)) {
+		if (util.isSymbol(may_be_flag) && COLOR_MAP.has(may_be_flag)) {
+			var style = COLOR_MAP.get(may_be_flag);
+			color_start = style.open;
+			color_end = style.close;
+			arguments = Array.slice(arguments, 1);
+		} else if (String.isString(may_be_flag)) {
 			var color_wrap = may_be_flag.match(color_flag_reg);
 			if (color_wrap) {
 				color_start = color_wrap[1];
@@ -115,11 +130,9 @@ Console.prototype = {
 		return res_symbol;
 	},
 	groupEnd: function(may_be_symbol) {
-		/* Match start-group-index */
-		if (util.isSymbol(may_be_symbol)) { // 交错模式
+		/* 交错模式 */
+		if (util.isSymbol(may_be_symbol)) {
 			const start_index = this.beforeSymbol.lastIndexOf(may_be_symbol)
-				/* === -1 ? -1 :
-								may_be_symbol.toString().replace(/Symbol\((\d+)\)/, "$1").toInt();*/
 			const before_len = this.beforeSymbol.length;
 			if (start_index !== -1 && start_index !== before_len - 1) {
 
@@ -130,7 +143,7 @@ Console.prototype = {
 				for (var i = start_index + 1; i < before_len; i += 1) {
 					backup.push(this.before[i]);
 					this.before[i] = Console.replaceColorContent(group_flag, this.before[i].replace(/(\s*)│(\s*)/, function(s, before_emp_s, after_emp_s) {
-						return "─".repeat(before_emp_s.length) + "┼" + ((i === before_len - 1) ? " " : "─").repeat(after_emp_s.length)
+						return "─".repeat(before_emp_s.length) + "┼" + ((i === before_len - 1) ? after_emp_s : "─".repeat(after_emp_s.length))
 					}));
 				}
 				this.before[start_index] = group_flag.replace("│ ", "└─");
@@ -150,7 +163,7 @@ Console.prototype = {
 				arguments = Array.slice(arguments, 1);
 			}
 		}
-		/* Match color */
+		/* 简单模式 */
 		var group_flag = this.before[this.before.length - 1];
 		this.before[this.before.length - 1] = group_flag.replace("│", "└");
 
