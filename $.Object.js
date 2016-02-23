@@ -173,4 +173,14 @@ Object.hangdownCurrentContext = Object.downCc = function(old_cci) {
 
 Object.isObject = function(obj) {
 	return typeof obj === "object" && obj !== null
-}
+};
+
+Object.definePropertyFromWeakMap = function(obj, weak_map, key, options) {
+	options || (options = {});
+	options.get = () => weak_map.get(obj);
+	if (options.hasOwnProperty("initValue")) {
+		weak_map.set(obj, options.initValue);
+	}
+
+	Object.defineProperty(obj, key, options);
+};

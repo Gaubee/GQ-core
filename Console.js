@@ -3,10 +3,11 @@ require("./$.Array");
 require("./$.Object");
 require("./$.String");
 var util = require("util")
-var color_flag_reg = /^(\u001b\[\d+m)[\s\S]+?(\u001b\[\d+m)/;
+var color_flag_reg = /(\u001b\[\d+m)([\s\S]+?)(\u001b\[\d+m)/; //不以^开头，前面可能有空格
 
 function Console() {
 	this.before = [];
+	this.beforeSymbol = [];
 	this.date_format = "hh:mm:ss MM-DD";
 	this.timeMap = {};
 	for (var i in this) {
@@ -16,12 +17,24 @@ function Console() {
 	}
 };
 var _console = global.console;
+
 global.nactive_console = _console;
+
+Console.replaceColorContent = function(str, replacer) {
+	if (color_flag_reg.test(str)) {
+		var replacer_color_info = replacer.match(color_flag_reg);
+		if (replacer_color_info) {
+			replacer = replacer_color_info[2]
+		}
+		return str.replace(color_flag_reg, "$1" + replacer.replaceAll("$", "$$$$") + "$3")
+	}
+	return replacer;
+};
 Console.prototype = {
 	addBefore: function(arr) {
 		arr = Array.slice(arr);
 		var strs = util.format.apply(this, arr);
-		var before_str = this.before.join(" ")
+		var before_str = this.before.join("")
 		strs = before_str + strs.replace(/\n/g, '\n' + before_str);
 		return [strs];
 	},
@@ -87,7 +100,7 @@ Console.prototype = {
 			var color_wrap = may_be_flag.match(color_flag_reg);
 			if (color_wrap) {
 				color_start = color_wrap[1];
-				color_end = color_wrap[2];
+				color_end = color_wrap[3];
 			}
 		}
 		this.before.push(color_start + "┌ " + color_end);
@@ -96,20 +109,55 @@ Console.prototype = {
 
 		this.before.pop();
 		this.before.push(color_start + "│ " + color_end);
+
+		var res_symbol = Symbol(this.beforeSymbol.length);
+		this.beforeSymbol.push(res_symbol);
+		return res_symbol;
 	},
-	groupEnd: function() {
-		var group_flag = this.before.pop();
-		var color_start = "";
-		var color_end = "";
-		var color_wrap = group_flag.match(color_flag_reg);
-		if (color_wrap) {
-			color_start = color_wrap[1];
-			color_end = color_wrap[2];
+	groupEnd: function(may_be_symbol) {
+		/* Match start-group-index */
+		if (util.isSymbol(may_be_symbol)) { // 交错模式
+			const start_index = this.beforeSymbol.lastIndexOf(may_be_symbol)
+				/* === -1 ? -1 :
+								may_be_symbol.toString().replace(/Symbol\((\d+)\)/, "$1").toInt();*/
+			const before_len = this.beforeSymbol.length;
+			if (start_index !== -1 && start_index !== before_len - 1) {
+
+				/* Match color */
+				var group_flag = this.before[start_index];
+
+				var backup = [];
+				for (var i = start_index + 1; i < before_len; i += 1) {
+					backup.push(this.before[i]);
+					this.before[i] = Console.replaceColorContent(group_flag, this.before[i].replace(/(\s*)│(\s*)/, function(s, before_emp_s, after_emp_s) {
+						return "─".repeat(before_emp_s.length) + "┼" + ((i === before_len - 1) ? " " : "─").repeat(after_emp_s.length)
+					}));
+				}
+				this.before[start_index] = group_flag.replace("│ ", "└─");
+
+				var args = this.addBefore(Array.slice(arguments, 1));
+				_console.log.apply(_console, args);
+
+				for (i -= 1; i > start_index; i -= 1) {
+					this.before[i] = backup.pop();
+				}
+
+				this.before.splice(start_index, 1);
+				this.before[i] = "  " + this.before[i];
+				this.beforeSymbol.splice(start_index, 1);
+				return
+			} else {
+				arguments = Array.slice(arguments, 1);
+			}
 		}
-		this.before.push(color_start + "└ " + color_end);
+		/* Match color */
+		var group_flag = this.before[this.before.length - 1];
+		this.before[this.before.length - 1] = group_flag.replace("│", "└");
+
 		var args = this.addBefore(arguments);
 		_console.log.apply(_console, args);
 		this.before.pop();
+		this.beforeSymbol.pop();
 	},
 	flag: function(flag) {
 		var arr = Array.slice(arguments);
@@ -150,3 +198,22 @@ global.console = global.con = new Console;
 // con.log("hahha5");
 // con.error(new Error("asd").stack);
 // con.groupEnd("haha3")
+
+
+// con = new Console;
+// var _3 = con.group("0".red)
+// var _0 = con.group("0".green)
+// var _1 = con.group("1".blue)
+// var _2 = con.group("2");
+// con.log({
+// 	test: "zzz",
+// 	zzz: {
+// 		cc: [1, 2, 3, 4, 5, 6],
+// 		dd: [1, 2, 3, 4, 5, 6],
+// 	},
+// 	f: () => {}
+// })
+// con.groupEnd(_1, "1")
+// con.groupEnd(_3, "0")
+// con.groupEnd(_2, "2")
+// con.groupEnd("0")
