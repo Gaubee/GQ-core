@@ -2,6 +2,11 @@
 
 对原生库的拓展以及常用库的引入，一下是和拓展出来的函数以及简单介绍。
 
+## 安装
+```
+npm install gq-core --save
+```
+
 ## 1. Console
 
 ### console.flag(flagHead<String>, ...args)
