@@ -102,22 +102,27 @@ exports.createClient = createClient;
 function createClient(address, callback) {
 	var client = net.connect(address, callback);
 	handleSocket(client);
-	//Model-Redis的拓展
-	redisExtendHandle.handleClient(client);
 	//Router拓展
 	routerExtendHandle.handleClient(client);
 	//App拓展
 	appExtendHandle.handleClient(client);
 	//Component拓展
 	comExtendHandle.handleClient(client);
+	//Component-Redis的拓展
+	redisExtendHandle.handleClient(client);
 
 	//删除没用的日志打印
 	var hiddenFlags = exports.config.hiddenFlags;
+
+	hiddenFlags.add("success:use-app");
 	hiddenFlags.add("success:return-task");
 	hiddenFlags.add("success:router-register");
 	hiddenFlags.add("success:component-register");
 	hiddenFlags.add("success:init-component");
+	// hiddenFlags.add("init-component");
 	hiddenFlags.add("success:order-component");
+	hiddenFlags.add("error:order-component");
+	// hiddenFlags.add("order-component");
 
 	return client;
 };

@@ -1,0 +1,777 @@
+[{
+	"command": "APPEND",
+	"args": ["key", "value"],
+	"des": "追加一个值到key上"
+}, {
+	"command": "AUTH",
+	"args": ["password"],
+	"des": "验证服务器"
+}, {
+	"command": "BGREWRITEAOF",
+	"args": [],
+	"des": "异步重写追加文件"
+}, {
+	"command": "BGSAVE",
+	"args": [],
+	"des": "异步保存数据集到磁盘上"
+}, {
+	"command": "BITCOUNT",
+	"args": ["key", "[start end]"],
+	"des": "统计字符串指定起始位置的字节数"
+}, {
+	"command": "BITOP",
+	"args": ["operation", "destkey", "key [key ...]"],
+	"des": "Perform bitwise operations between strings"
+}, {
+	"command": "BITPOS",
+	"args": ["key", "bit", "[start]", "[end]"],
+	"des": "Find first bit set or clear in a string"
+}, {
+	"command": "BLPOP",
+	"args": ["key [key ...]", "timeout"],
+	"des": "删除，并获得该列表中的第一元素，或阻塞，直到有一个可用"
+}, {
+	"command": "BRPOP",
+	"args": ["key [key ...]", "timeout"],
+	"des": "删除，并获得该列表中的最后一个元素，或阻塞，直到有一个可用"
+}, {
+	"command": "BRPOPLPUSH",
+	"args": ["source", "destination", "timeout"],
+	"des": "弹出一个列表的值，将它推到另一个列表，并返回它;或阻塞，直到有一个可用"
+}, {
+	"command": "CLIENT KILL",
+	"args": ["[ip:port]", "[ID client-id]", "[TYPE normal|slave|pubsub]", "[ADDR ip:port]", "[SKIPME yes/no]"],
+	"des": "关闭客户端连接"
+}, {
+	"command": "CLIENT LIST",
+	"args": [],
+	"des": "获得客户端连接列表"
+}, {
+	"command": "CLIENT GETNAME",
+	"args": [],
+	"des": "获得当前连接名称"
+}, {
+	"command": "CLIENT PAUSE",
+	"args": ["timeout"],
+	"des": "暂停处理客户端命令"
+}, {
+	"command": "CLIENT SETNAME",
+	"args": ["connection-name"],
+	"des": "设置当前连接的名字"
+}, {
+	"command": "CLUSTER ADDSLOTS",
+	"args": ["slot [slot ...]"],
+	"des": "Assign new hash slots to receiving node"
+}, {
+	"command": "CLUSTER COUNT-FAILURE-REPORTS",
+	"args": ["node-id"],
+	"des": "Return the number of failure reports active for a given node"
+}, {
+	"command": "CLUSTER COUNTKEYSINSLOT",
+	"args": ["slot"],
+	"des": "Return the number of local keys in the specified hash slot"
+}, {
+	"command": "CLUSTER DELSLOTS",
+	"args": ["slot [slot ...]"],
+	"des": "Set hash slots as unbound in receiving node"
+}, {
+	"command": "CLUSTER FAILOVER",
+	"args": ["[FORCE|TAKEOVER]"],
+	"des": "Forces a slave to perform a manual failover of its master."
+}, {
+	"command": "CLUSTER FORGET",
+	"args": ["node-id"],
+	"des": "Remove a node from the nodes table"
+}, {
+	"command": "CLUSTER GETKEYSINSLOT",
+	"args": ["slot", "count"],
+	"des": "Return local key names in the specified hash slot"
+}, {
+	"command": "CLUSTER INFO",
+	"args": [],
+	"des": "Provides info about Redis Cluster node state"
+}, {
+	"command": "CLUSTER KEYSLOT",
+	"args": ["key"],
+	"des": "Returns the hash slot of the specified key"
+}, {
+	"command": "CLUSTER MEET",
+	"args": ["ip", "port"],
+	"des": "Force a node cluster to handshake with another node"
+}, {
+	"command": "CLUSTER NODES",
+	"args": [],
+	"des": "Get Cluster config for the node"
+}, {
+	"command": "CLUSTER REPLICATE",
+	"args": ["node-id"],
+	"des": "Reconfigure a node as a slave of the specified master node"
+}, {
+	"command": "CLUSTER RESET",
+	"args": ["[HARD|SOFT]"],
+	"des": "Reset a Redis Cluster node"
+}, {
+	"command": "CLUSTER SAVECONFIG",
+	"args": [],
+	"des": "Forces the node to save cluster state on disk"
+}, {
+	"command": "CLUSTER SET-CONFIG-EPOCH",
+	"args": ["config-epoch"],
+	"des": "Set the configuration epoch in a new node"
+}, {
+	"command": "CLUSTER SETSLOT",
+	"args": ["slot", "IMPORTING|MIGRATING|STABLE|NODE", "[node-id]"],
+	"des": "Bind an hash slot to a specific node"
+}, {
+	"command": "CLUSTER SLAVES",
+	"args": ["node-id"],
+	"des": "List slave nodes of the specified master node"
+}, {
+	"command": "CLUSTER SLOTS",
+	"args": [],
+	"des": "Get array of Cluster slot to node mappings"
+}, {
+	"command": "COMMAND",
+	"args": [],
+	"des": "Get array of Redis command details"
+}, {
+	"command": "COMMAND COUNT",
+	"args": [],
+	"des": "Get total number of Redis commands"
+}, {
+	"command": "COMMAND GETKEYS",
+	"args": [],
+	"des": "Extract keys given a full Redis command"
+}, {
+	"command": "COMMAND INFO",
+	"args": ["command-name [command-name ...]"],
+	"des": "Get array of specific Redis command details"
+}, {
+	"command": "CONFIG GET",
+	"args": ["parameter"],
+	"des": "获取配置参数的值"
+}, {
+	"command": "CONFIG REWRITE",
+	"args": [],
+	"des": "从写内存中的配置文件"
+}, {
+	"command": "CONFIG SET",
+	"args": ["parameter", "value"],
+	"des": "设置配置文件"
+}, {
+	"command": "CONFIG RESETSTAT",
+	"args": [],
+	"des": "复位再分配使用info命令报告的统计"
+}, {
+	"command": "DBSIZE",
+	"args": [],
+	"des": "返回当前数据库里面的keys数量"
+}, {
+	"command": "DEBUG OBJECT",
+	"args": ["key"],
+	"des": "获取一个key的debug信息"
+}, {
+	"command": "DEBUG SEGFAULT",
+	"args": [],
+	"des": "使服务器崩溃"
+}, {
+	"command": "DECR",
+	"args": ["key"],
+	"des": "整数原子减1"
+}, {
+	"command": "DECRBY",
+	"args": ["key", "decrement"],
+	"des": "原子减指定的整数"
+}, {
+	"command": "DEL",
+	"args": ["key [key ...]"],
+	"des": "删除一个key"
+}, {
+	"command": "DISCARD",
+	"args": [],
+	"des": "丢弃所有 MULTI 之后发的命令"
+}, {
+	"command": "DUMP",
+	"args": ["key"],
+	"des": "导出key的值"
+}, {
+	"command": "ECHO",
+	"args": ["message"],
+	"des": "回显输入的字符串"
+}, {
+	"command": "EVAL",
+	"args": ["script", "numkeys", "key [key ...]", "arg [arg ...]"],
+	"des": "在服务器端执行 LUA 脚本"
+}, {
+	"command": "EVALSHA",
+	"args": ["sha1", "numkeys", "key [key ...]", "arg [arg ...]"],
+	"des": "在服务器端执行 LUA 脚本"
+}, {
+	"command": "EXEC",
+	"args": [],
+	"des": "执行所有 MULTI 之后发的命令"
+}, {
+	"command": "EXISTS",
+	"args": ["key [key ...]"],
+	"des": "查询一个key是否存在"
+}, {
+	"command": "EXPIRE",
+	"args": ["key", "seconds"],
+	"des": "设置一个key的过期的秒数"
+}, {
+	"command": "EXPIREAT",
+	"args": ["key", "timestamp"],
+	"des": "设置一个UNIX时间戳的过期时间"
+}, {
+	"command": "FLUSHALL",
+	"args": [],
+	"des": "清空所有数据库"
+}, {
+	"command": "FLUSHDB",
+	"args": [],
+	"des": "清空当前的数据库"
+}, {
+	"command": "GEOADD",
+	"args": ["key", "longitude latitude member [longitude latitude member ...]"],
+	"des": "Add one or more geospatial items in the geospatial index represented using a sorted set"
+}, {
+	"command": "GEOHASH",
+	"args": ["key", "member [member ...]"],
+	"des": "Returns members of a geospatial index as standard geohash strings"
+}, {
+	"command": "GEOPOS",
+	"args": ["key", "member [member ...]"],
+	"des": "Returns longitude and latitude of members of a geospatial index"
+}, {
+	"command": "GEODIST",
+	"args": ["key", "member1", "member2", "[unit]"],
+	"des": "Returns the distance between two members of a geospatial index"
+}, {
+	"command": "GEORADIUS",
+	"args": ["key", "longitude", "latitude", "radius", "m|km|ft|mi", "[WITHCOORD]", "[WITHDIST]", "[WITHHASH]", "[COUNT count]"],
+	"des": "Query a sorted set representing a geospatial index to fetch members matching a given maximum distance from a point"
+}, {
+	"command": "GEORADIUSBYMEMBER",
+	"args": ["key", "member", "radius", "m|km|ft|mi", "[WITHCOORD]", "[WITHDIST]", "[WITHHASH]", "[COUNT count]"],
+	"des": "Query a sorted set representing a geospatial index to fetch members matching a given maximum distance from a member"
+}, {
+	"command": "GET",
+	"args": ["key"],
+	"des": "Get the value of a key"
+}, {
+	"command": "GETBIT",
+	"args": ["key", "offset"],
+	"des": "返回位的值存储在关键的字符串值的偏移量。"
+}, {
+	"command": "GETRANGE",
+	"args": ["key", "start", "end"],
+	"des": "获取存储在key上的值的一个子字符串"
+}, {
+	"command": "GETSET",
+	"args": ["key", "value"],
+	"des": "设置一个key的value，并获取设置前的值"
+}, {
+	"command": "HDEL",
+	"args": ["key", "field [field ...]"],
+	"des": "删除一个或多个Hash的field"
+}, {
+	"command": "HEXISTS",
+	"args": ["key", "field"],
+	"des": "判断field是否存在于hash中"
+}, {
+	"command": "HGET",
+	"args": ["key", "field"],
+	"des": "获取hash中field的值"
+}, {
+	"command": "HGETALL",
+	"args": ["key"],
+	"des": "从hash中读取全部的域和值"
+}, {
+	"command": "HINCRBY",
+	"args": ["key", "field", "increment"],
+	"des": "将hash中指定域的值增加给定的数字"
+}, {
+	"command": "HINCRBYFLOAT",
+	"args": ["key", "field", "increment"],
+	"des": "将hash中指定域的值增加给定的浮点数"
+}, {
+	"command": "HKEYS",
+	"args": ["key"],
+	"des": "获取hash的所有字段"
+}, {
+	"command": "HLEN",
+	"args": ["key"],
+	"des": "获取hash里所有字段的数量"
+}, {
+	"command": "HMGET",
+	"args": ["key", "field [field ...]"],
+	"des": "获取hash里面指定字段的值"
+}, {
+	"command": "HMSET",
+	"args": ["key", "field value [field value ...]"],
+	"des": "设置hash字段值"
+}, {
+	"command": "HSET",
+	"args": ["key", "field", "value"],
+	"des": "设置hash里面一个字段的值"
+}, {
+	"command": "HSETNX",
+	"args": ["key", "field", "value"],
+	"des": "设置hash的一个字段，只有当这个字段不存在时有效"
+}, {
+	"command": "HSTRLEN",
+	"args": ["key", "field"],
+	"des": "Get the length of the value of a hash field"
+}, {
+	"command": "HVALS",
+	"args": ["key"],
+	"des": "获得hash的所有值"
+}, {
+	"command": "INCR",
+	"args": ["key"],
+	"des": "执行原子加1操作"
+}, {
+	"command": "INCRBY",
+	"args": ["key", "increment"],
+	"des": "执行原子增加一个整数"
+}, {
+	"command": "INCRBYFLOAT",
+	"args": ["key", "increment"],
+	"des": "执行原子增加一个浮点数"
+}, {
+	"command": "INFO",
+	"args": ["[section]"],
+	"des": "获得服务器的详细信息"
+}, {
+	"command": "KEYS",
+	"args": ["pattern"],
+	"des": "查找所有匹配给定的模式的键"
+}, {
+	"command": "LASTSAVE",
+	"args": [],
+	"des": "获得最后一次同步磁盘的时间"
+}, {
+	"command": "LINDEX",
+	"args": ["key", "index"],
+	"des": "获取一个元素，通过其索引列表"
+}, {
+	"command": "LINSERT",
+	"args": ["key", "BEFORE|AFTER", "pivot", "value"],
+	"des": "在列表中的另一个元素之前或之后插入一个元素"
+}, {
+	"command": "LLEN",
+	"args": ["key"],
+	"des": "获得队列(List)的长度"
+}, {
+	"command": "LPOP",
+	"args": ["key"],
+	"des": "从队列的左边出队一个元素"
+}, {
+	"command": "LPUSH",
+	"args": ["key", "value [value ...]"],
+	"des": "从队列的左边入队一个或多个元素"
+}, {
+	"command": "LPUSHX",
+	"args": ["key", "value"],
+	"des": "当队列存在时，从队到左边入队一个元素"
+}, {
+	"command": "LRANGE",
+	"args": ["key", "start", "stop"],
+	"des": "从列表中获取指定返回的元素"
+}, {
+	"command": "LREM",
+	"args": ["key", "count", "value"],
+	"des": "从列表中删除元素"
+}, {
+	"command": "LSET",
+	"args": ["key", "index", "value"],
+	"des": "设置队列里面一个元素的值"
+}, {
+	"command": "LTRIM",
+	"args": ["key", "start", "stop"],
+	"des": "修剪到指定范围内的清单"
+}, {
+	"command": "MGET",
+	"args": ["key [key ...]"],
+	"des": "获得所有key的值"
+}, {
+	"command": "MIGRATE",
+	"args": ["host", "port", "key", "destination-db", "timeout", "[COPY]", "[REPLACE]"],
+	"des": "原子性的将key从redis的一个实例移到另一个实例"
+}, {
+	"command": "MONITOR",
+	"args": [],
+	"des": "实时监控服务器"
+}, {
+	"command": "MOVE",
+	"args": ["key", "db"],
+	"des": "移动一个key到另一个数据库"
+}, {
+	"command": "MSET",
+	"args": ["key value [key value ...]"],
+	"des": "设置多个key value"
+}, {
+	"command": "MSETNX",
+	"args": ["key value [key value ...]"],
+	"des": "设置多个key value,仅当key存在时"
+}, {
+	"command": "MULTI",
+	"args": [],
+	"des": "标记一个事务块开始"
+}, {
+	"command": "OBJECT",
+	"args": ["subcommand", "[arguments [arguments ...]]"],
+	"des": "检查内部的再分配对象"
+}, {
+	"command": "PERSIST",
+	"args": ["key"],
+	"des": "移除key的过期时间"
+}, {
+	"command": "PEXPIRE",
+	"args": ["key", "milliseconds"],
+	"des": "Set a key's time to live in milliseconds"
+}, {
+	"command": "PEXPIREAT",
+	"args": ["key", "milliseconds-timestamp"],
+	"des": "Set the expiration for a key as a UNIX timestamp specified in milliseconds"
+}, {
+	"command": "PFADD",
+	"args": ["key", "element [element ...]"],
+	"des": "Adds the specified elements to the specified HyperLogLog."
+}, {
+	"command": "PFCOUNT",
+	"args": ["key [key ...]"],
+	"des": "Return the approximated cardinality of the set(s) observed by the HyperLogLog at key(s)."
+}, {
+	"command": "PFMERGE",
+	"args": ["destkey", "sourcekey [sourcekey ...]"],
+	"des": "Merge N different HyperLogLogs into a single one."
+}, {
+	"command": "PING",
+	"args": [],
+	"des": "Ping 服务器"
+}, {
+	"command": "PSETEX",
+	"args": ["key", "milliseconds", "value"],
+	"des": "Set the value and expiration in milliseconds of a key"
+}, {
+	"command": "PSUBSCRIBE",
+	"args": ["pattern [pattern ...]"],
+	"des": "Listen for messages published to channels matching the given patterns"
+}, {
+	"command": "PUBSUB",
+	"args": ["subcommand", "[argument [argument ...]]"],
+	"des": "Inspect the state of the Pub/Sub subsystem"
+}, {
+	"command": "PTTL",
+	"args": ["key"],
+	"des": "获取key的有效毫秒数"
+}, {
+	"command": "PUBLISH",
+	"args": ["channel", "message"],
+	"des": "发布一条消息到频道"
+}, {
+	"command": "PUNSUBSCRIBE",
+	"args": ["[pattern [pattern ...]]"],
+	"des": "停止发布到匹配给定模式的渠道的消息听"
+}, {
+	"command": "QUIT",
+	"args": [],
+	"des": "关闭连接，退出"
+}, {
+	"command": "RANDOMKEY",
+	"args": [],
+	"des": "返回一个随机的key"
+}, {
+	"command": "READONLY",
+	"args": [],
+	"des": "Enables read queries for a connection to a cluster slave node"
+}, {
+	"command": "READWRITE",
+	"args": [],
+	"des": "Disables read queries for a connection to a cluster slave node"
+}, {
+	"command": "RENAME",
+	"args": ["key", "newkey"],
+	"des": "将一个key重命名"
+}, {
+	"command": "RENAMENX",
+	"args": ["key", "newkey"],
+	"des": "重命名一个key,新的key必须是不存在的key"
+}, {
+	"command": "RESTORE",
+	"args": ["key", "ttl", "serialized-value", "[REPLACE]"],
+	"des": "Create a key using the provided serialized value, previously obtained using DUMP."
+}, {
+	"command": "ROLE",
+	"args": [],
+	"des": "Return the role of the instance in the context of replication"
+}, {
+	"command": "RPOP",
+	"args": ["key"],
+	"des": "从队列的右边出队一个元"
+}, {
+	"command": "RPOPLPUSH",
+	"args": ["source", "destination"],
+	"des": "删除列表中的最后一个元素，将其追加到另一个列表"
+}, {
+	"command": "RPUSH",
+	"args": ["key", "value [value ...]"],
+	"des": "从队列的右边入队一个元素"
+}, {
+	"command": "RPUSHX",
+	"args": ["key", "value"],
+	"des": "从队列的右边入队一个元素，仅队列存在时有效"
+}, {
+	"command": "SADD",
+	"args": ["key", "member [member ...]"],
+	"des": "添加一个或者多个元素到集合(set)里"
+}, {
+	"command": "SAVE",
+	"args": [],
+	"des": "同步数据到磁盘上"
+}, {
+	"command": "SCARD",
+	"args": ["key"],
+	"des": "获取集合里面的元素数量"
+}, {
+	"command": "SCRIPT EXISTS",
+	"args": ["script [script ...]"],
+	"des": "Check existence of scripts in the script cache."
+}, {
+	"command": "SCRIPT FLUSH",
+	"args": [],
+	"des": "删除服务器缓存中所有Lua脚本。"
+}, {
+	"command": "SCRIPT KILL",
+	"args": [],
+	"des": "杀死当前正在运行的 Lua 脚本。"
+}, {
+	"command": "SCRIPT LOAD",
+	"args": ["script"],
+	"des": "从服务器缓存中装载一个Lua脚本。"
+}, {
+	"command": "SDIFF",
+	"args": ["key [key ...]"],
+	"des": "获得队列不存在的元素"
+}, {
+	"command": "SDIFFSTORE",
+	"args": ["destination", "key [key ...]"],
+	"des": "获得队列不存在的元素，并存储在一个关键的结果集"
+}, {
+	"command": "SELECT",
+	"args": ["index"],
+	"des": "选择新数据库"
+}, {
+	"command": "SET",
+	"args": ["key", "value", "[EX seconds]", "[PX milliseconds]", "[NX|XX]"],
+	"des": "设置一个key的value值"
+}, {
+	"command": "SETBIT",
+	"args": ["key", "offset", "value"],
+	"des": "Sets or clears the bit at offset in the string value stored at key"
+}, {
+	"command": "SETEX",
+	"args": ["key", "seconds", "value"],
+	"des": "设置key-value并设置过期时间（单位：秒）"
+}, {
+	"command": "SETNX",
+	"args": ["key", "value"],
+	"des": "设置的一个关键的价值，只有当该键不存在"
+}, {
+	"command": "SETRANGE",
+	"args": ["key", "offset", "value"],
+	"des": "Overwrite part of a string at key starting at the specified offset"
+}, {
+	"command": "SHUTDOWN",
+	"args": ["[NOSAVE]", "[SAVE]"],
+	"des": "关闭服务"
+}, {
+	"command": "SINTER",
+	"args": ["key [key ...]"],
+	"des": "获得两个集合的交集"
+}, {
+	"command": "SINTERSTORE",
+	"args": ["destination", "key [key ...]"],
+	"des": "获得两个集合的交集，并存储在一个关键的结果集"
+}, {
+	"command": "SISMEMBER",
+	"args": ["key", "member"],
+	"des": "确定一个给定的值是一个集合的成员"
+}, {
+	"command": "SLAVEOF",
+	"args": ["host", "port"],
+	"des": "指定当前服务器的主服务器"
+}, {
+	"command": "SLOWLOG",
+	"args": ["subcommand", "[argument]"],
+	"des": "管理再分配的慢查询日志"
+}, {
+	"command": "SMEMBERS",
+	"args": ["key"],
+	"des": "获取集合里面的所有key"
+}, {
+	"command": "SMOVE",
+	"args": ["source", "destination", "member"],
+	"des": "移动集合里面的一个key到另一个集合"
+}, {
+	"command": "SORT",
+	"args": ["key", "[BY pattern]", "[LIMIT offset count]", "[GET pattern [GET pattern ...]]", "[ASC|DESC]", "[ALPHA]", "[STORE destination]"],
+	"des": "对队列、集合、有序集合排序"
+}, {
+	"command": "SPOP",
+	"args": ["key", "[count]"],
+	"des": "删除并获取一个集合里面的元素"
+}, {
+	"command": "SRANDMEMBER",
+	"args": ["key", "[count]"],
+	"des": "从集合里面随机获取一个key"
+}, {
+	"command": "SREM",
+	"args": ["key", "member [member ...]"],
+	"des": "从集合里删除一个或多个key"
+}, {
+	"command": "STRLEN",
+	"args": ["key"],
+	"des": "获取指定key值的长度"
+}, {
+	"command": "SUBSCRIBE",
+	"args": ["channel [channel ...]"],
+	"des": "监听频道发布的消息"
+}, {
+	"command": "SUNION",
+	"args": ["key [key ...]"],
+	"des": "添加多个set元素"
+}, {
+	"command": "SUNIONSTORE",
+	"args": ["destination", "key [key ...]"],
+	"des": "合并set元素，并将结果存入新的set里面"
+}, {
+	"command": "SYNC",
+	"args": [],
+	"des": "用于复制的内部命令"
+}, {
+	"command": "TIME",
+	"args": [],
+	"des": "返回当前服务器时间"
+}, {
+	"command": "TTL",
+	"args": ["key"],
+	"des": "获取key的有效时间（单位：秒）"
+}, {
+	"command": "TYPE",
+	"args": ["key"],
+	"des": "获取key的存储类型"
+}, {
+	"command": "UNSUBSCRIBE",
+	"args": ["[channel [channel ...]]"],
+	"des": "停止频道监听"
+}, {
+	"command": "UNWATCH",
+	"args": [],
+	"des": "取消事务"
+}, {
+	"command": "WAIT",
+	"args": ["numslaves", "timeout"],
+	"des": "Wait for the synchronous replication of all the write commands sent in the context of the current connection"
+}, {
+	"command": "WATCH",
+	"args": ["key [key ...]"],
+	"des": "锁定key直到执行了 MULTI/EXEC 命令"
+}, {
+	"command": "ZADD",
+	"args": ["key", "[NX|XX]", "[CH]", "[INCR]", "score member [score member ...]"],
+	"des": "添加到有序set的一个或多个成员，或更新的分数，如果它已经存在"
+}, {
+	"command": "ZCARD",
+	"args": ["key"],
+	"des": "获取一个排序的集合中的成员数量"
+}, {
+	"command": "ZCOUNT",
+	"args": ["key", "min", "max"],
+	"des": "给定值范围内的成员数与分数排序"
+}, {
+	"command": "ZINCRBY",
+	"args": ["key", "increment", "member"],
+	"des": "增量的一名成员在排序设置的评分"
+}, {
+	"command": "ZINTERSTORE",
+	"args": ["destination", "numkeys", "key [key ...]", "[WEIGHTS weight [weight ...]]", "[AGGREGATE SUM|MIN|MAX]"],
+	"des": "相交多个排序集，导致排序的设置存储在一个新的关键"
+}, {
+	"command": "ZLEXCOUNT",
+	"args": ["key", "min", "max"],
+	"des": "Count the number of members in a sorted set between a given lexicographical range"
+}, {
+	"command": "ZRANGE",
+	"args": ["key", "start", "stop", "[WITHSCORES]"],
+	"des": "根据指定的index返回，返回sorted set的成员列表"
+}, {
+	"command": "ZRANGEBYLEX",
+	"args": ["key", "min", "max", "[LIMIT offset count]"],
+	"des": "Return a range of members in a sorted set, by lexicographical range"
+}, {
+	"command": "ZREVRANGEBYLEX",
+	"args": ["key", "max", "min", "[LIMIT offset count]"],
+	"des": "Return a range of members in a sorted set, by lexicographical range, ordered from higher to lower strings."
+}, {
+	"command": "ZRANGEBYSCORE",
+	"args": ["key", "min", "max", "[WITHSCORES]", "[LIMIT offset count]"],
+	"des": "根据指定的score返回，返回sorted set的成员列表"
+}, {
+	"command": "ZRANK",
+	"args": ["key", "member"],
+	"des": "确定在排序集合成员的索引"
+}, {
+	"command": "ZREM",
+	"args": ["key", "member [member ...]"],
+	"des": "从排序的集合中删除一个或多个成员"
+}, {
+	"command": "ZREMRANGEBYLEX",
+	"args": ["key", "min", "max"],
+	"des": "Remove all members in a sorted set between the given lexicographical range"
+}, {
+	"command": "ZREMRANGEBYRANK",
+	"args": ["key", "start", "stop"],
+	"des": "在排序设置的所有成员在给定的索引中删除"
+}, {
+	"command": "ZREMRANGEBYSCORE",
+	"args": ["key", "min", "max"],
+	"des": "删除一个排序的设置在给定的分数所有成员"
+}, {
+	"command": "ZREVRANGE",
+	"args": ["key", "start", "stop", "[WITHSCORES]"],
+	"des": "在排序的设置返回的成员范围，通过索引，下令从分数高到低"
+}, {
+	"command": "ZREVRANGEBYSCORE",
+	"args": ["key", "max", "min", "[WITHSCORES]", "[LIMIT offset count]"],
+	"des": "返回的成员在排序设置的范围，由得分，下令从分数高到低"
+}, {
+	"command": "ZREVRANK",
+	"args": ["key", "member"],
+	"des": "确定指数在排序集的成员，下令从分数高到低"
+}, {
+	"command": "ZSCORE",
+	"args": ["key", "member"],
+	"des": "获取成员在排序设置相关的比分"
+}, {
+	"command": "ZUNIONSTORE",
+	"args": ["destination", "numkeys", "key [key ...]", "[WEIGHTS weight [weight ...]]", "[AGGREGATE SUM|MIN|MAX]"],
+	"des": "添加多个排序集和导致排序的设置存储在一个新的关键"
+}, {
+	"command": "SCAN",
+	"args": ["cursor", "[MATCH pattern]", "[COUNT count]"],
+	"des": "增量迭代key"
+}, {
+	"command": "SSCAN",
+	"args": ["key", "cursor", "[MATCH pattern]", "[COUNT count]"],
+	"des": "迭代set里面的元素"
+}, {
+	"command": "HSCAN",
+	"args": ["key", "cursor", "[MATCH pattern]", "[COUNT count]"],
+	"des": "迭代hash里面的元素"
+}, {
+	"command": "ZSCAN",
+	"args": ["key", "cursor", "[MATCH pattern]", "[COUNT count]"],
+	"des": "迭代sorted sets里面的元素"
+}]

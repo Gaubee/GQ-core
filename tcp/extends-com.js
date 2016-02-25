@@ -452,6 +452,8 @@ function initComponent(socket, is_server) {
 						});
 					}
 					Object.defineProperty(com_instance_proxy, key, {
+						enumerable: true,
+						configurable: false,
 						get: () => {
 							return component_proxy_method_runner
 						}
@@ -502,7 +504,7 @@ exports.orderComponent = orderComponent;
  * Client->Server-Client通用
  */
 function orderComponent(socket, is_server) {
-	var orders = new Map();
+	const orders = new Map();
 	if (is_server) {
 		socket.callOrderComponent = function(info) {
 			return new Promise(function(resolve, reject) {
@@ -530,7 +532,7 @@ function orderComponent(socket, is_server) {
 			if (!String.asString(order)) {
 				Throw("type", "order must be String");
 			}
-			var order_id = $$.uuid("ORDER-ID@");
+			const order_id = $$.uuid("ORDER-ID@");
 
 			return new Promise(function(resolve, reject) {
 				socket.msgInfo("order-component", {
@@ -547,8 +549,8 @@ function orderComponent(socket, is_server) {
 		};
 	}
 	socket.onMsgSuccess("order-component", function(data, done) {
-		var order_id = data.info && data.info.order_id;
-		var order = orders.get(order_id);
+		const order_id = data.info && data.info.order_id;
+		const order = orders.get(order_id);
 		if (order) {
 			orders.delete(order_id);
 			order.resolve(data.info.returns);
@@ -557,8 +559,9 @@ function orderComponent(socket, is_server) {
 	});
 
 	socket.onMsgError("order-component", function(data, done) {
-		var order_id = data.info && data.info.order_id;
-		var order = orders.get(order_id);
+		const order_id = data.info && data.info.order_id;
+		const order = orders.get(order_id);
+
 		if (order) {
 			orders.delete(order_id);
 			order.reject(data.msg);

@@ -10,7 +10,7 @@ global.co = function co_pro(gen) {
 		}
 		var res = _co.apply(this, args);
 		if (Function.isFunction(catch_fun)) {
-			res.catch(catch_fun);
+			res = res.catch(catch_fun);
 		}
 	} else {
 		res = _co(gen);
@@ -22,7 +22,11 @@ co.wrap = function(fn, catch_fun) {
 	return createPromise;
 
 	function createPromise() {
-		return co(fn.apply(this, arguments), catch_fun);
+		return co(fn.apply(this, arguments), err => {
+			const args = Array.slice(arguments);
+			args.unshift(err);
+			catch_fun.apply(this, args);
+		});
 	}
 };
 
@@ -32,8 +36,7 @@ Tools.sleep = function(time) {
 	return new Promise(function(resolve) {
 		setTimeout(resolve, time)
 	});
-}
-
+};
 /*
 co(function() {
 	console.log(1);

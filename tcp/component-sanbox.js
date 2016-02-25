@@ -22,7 +22,7 @@ class ComponentSandboxFactory {
 			};`
 		} else if (type === "function") {
 			if (!Array.isArray(args)) {
-				Throw("type", "Class Component's args mush be Array");
+				Throw("type", "Function Component's args mush be Array");
 			};
 			var code = `
 			function ComponentContructor(com, args) {

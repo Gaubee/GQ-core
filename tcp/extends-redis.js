@@ -2,37 +2,58 @@
 exports.handleClient = handleClient;
 
 function handleClient(socket) {
-	var tasks = exports.redisTasks = new Map();
-	socket.redisExec = function(handle, args) {
-		var task_id = $$.uuid("REDIS-EXEC-TASK-ID-");
-		return new Promise(function(resolve, reject) {
-			tasks.set(task_id, {
-				resolve: resolve,
-				reject: reject
-			});
-			socket.msgInfo("redis-exec", {
-				task_id: task_id,
-				handle: handle,
-				args: args
-			});
-		});
+	const redis_server_component_name = "Common-Redis-Server";
+	socket.redisClient = function(app_name) {
+		return socket.initComponent(app_name || socket.using_app.app_name, redis_server_component_name, [])
 	};
-	socket.onMsgSuccess("redis-return", function(data, done) {
-		// console.log(data.info.task_id);
-		var task = tasks.get(data.info.task_id);
-		if (task) {
-			tasks.delete(data.info.task_id);
-			task.resolve(data.info.returns);
+
+	const redisCommands = require("./redis-commands.json");
+	const redisMethods = redisCommands.filterMap(redis_command => {
+		return redis_command.command.indexOf(" ") === -1 && {
+			name: redis_command.command,
+			params: redis_command.args.map(arg => {
+				return {
+					name: arg
+				};
+			}),
+			des: redis_command.des
 		}
-		done();
 	});
-	socket.onMsgError("redis-return", function(data, done) {
-		// console.log(data.info.task_id);
-		var task = tasks.get(data.info.task_id);
-		if (task) {
-			tasks.delete(data.info.task_id);
-			task.reject(data.msg);
-		}
-		done();
-	});
+	// 挂起一个redis组件服务
+	socket.redisServer = function(options, redis_init_args) {
+		options || (options = {});
+		redis_init_args = Array.asArray(redis_init_args);
+
+		const des = options.des || "通用Redis服务";
+		const redis = require("redis");
+
+		return socket.registerComponent(redis_server_component_name, {
+			des: des,
+			methods: redisMethods
+		}, function createRedisServer() {
+			const client = redis.createClient.apply(redis, redis_init_args);
+			const clientProxy = redisMethods.reduce(function(res, redis_method) {
+				const method_name = redis_method.name;
+				if (res[method_name]) {
+					return res;
+				}
+				res[method_name] = function() {
+					const args = Array.slice(arguments);
+					return new Promise((resolve, reject) => {
+						args.push((err, res) => {
+							err ? reject(err) : resolve(res);
+						});
+						client[method_name].apply(client, args)
+					});
+				};
+				return res;
+			}, Object.create(null));
+
+			clientProxy[socket.destroy_symbol] = function() {
+				client.end(true);
+				return true;
+			};
+			return clientProxy;
+		});
+	}
 }
