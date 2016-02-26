@@ -229,11 +229,12 @@ function registerComponent(socket) {
 
 	socket.onMsgInfo("init-component", function(data, done) {
 		// 从服务端发来的，所以已经确保和register的数据是同步了，com_name是在Server校验过的。
-		try {
-			var safe_task_id = data.info.task_id;
-			if (!safe_task_id) {
-				Throw("ref", "safe_task_id must be Unique-String.");
-			}
+		var safe_task_id = data.info.task_id;
+		if (!safe_task_id) {
+			console.log(new ReferenceError("safe_task_id must be Unique-String."));
+			return done();
+		}
+		co(function*() {
 			if (componentSandboxFactory.has(safe_task_id)) {
 				Throw("ref", "safe_task_id aleary be used.");
 			}
@@ -243,7 +244,10 @@ function registerComponent(socket) {
 				Throw("ref", "lost Component-Constructor<" + com_name + ">");
 			}
 
-			componentSandboxFactory.buildComponentSandbox(com_info.com, com_info.type, data.info.init_protos, safe_task_id);
+			const sandbox = componentSandboxFactory.buildComponentSandbox(com_info.com, com_info.type, data.info.init_protos, safe_task_id);
+			if (sandbox.com_instance instanceof Promise) {
+				sandbox.com_instance = yield sandbox.com_instance;
+			}
 
 			// 跟着DOC对象提供接口
 			var protos = {};
@@ -256,13 +260,11 @@ function registerComponent(socket) {
 				task_id: safe_task_id,
 				protos: protos
 			});
-		} catch (err) {
-			console.flag("init-component", err);
+		}, err => {
 			socket.msgError("init-component", {
 				task_id: safe_task_id
-			}, Error.isError(err) ? err.message : err);
-		}
-		done();
+			}, err);
+		});
 	});
 
 	/*
@@ -384,6 +386,24 @@ function initComponent(socket, is_server) {
 			});
 		};
 	} else {
+
+		/*
+		 * AOP Component
+		 * 对一个返回对象的属性进行重写的辅助函数
+		 */
+		socket.rewriteComponentProxy = function(com_instance_proxy, prop, then) {
+			if (com_instance_proxy[com_instance_proxy_symbol]) {
+				const fun_getter_des = Object.getOwnPropertyDescriptor(db_proxy, "collection");
+				const fun_getter = fun_getter_des.get;
+				fun_getter_des.get = function() {
+					const fun = fun_getter.call(this);
+					return function() {
+						return fun.apply(this, arguments).then(then);
+					}
+				}
+			}
+		};
+
 		/*
 		 * 用户层的发送并接收后，需要将接受的数据进一步做处理
 		 */
@@ -453,7 +473,7 @@ function initComponent(socket, is_server) {
 					}
 					Object.defineProperty(com_instance_proxy, key, {
 						enumerable: true,
-						configurable: false,
+						configurable: true,
 						get: () => {
 							return component_proxy_method_runner
 						}

@@ -2,7 +2,7 @@
 exports.handleClient = handleClient;
 
 function handleClient(socket) {
-	const redis_server_component_name = "Common-Redis-Server";
+	const redis_server_component_name = "Redis:Server";
 	socket.redisClient = function(app_name) {
 		return socket.initComponent(app_name || socket.using_app.app_name, redis_server_component_name, [])
 	};
