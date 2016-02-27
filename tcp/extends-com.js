@@ -163,7 +163,7 @@ exports.registerComponent = registerComponent;
 /*
  * 注册组件，以及响应组件实例的生成
  */
-var destroy_GQ_component_symbol = Symbol("destroy-GQ-component");
+const destroy_GQ_component_symbol = exports.destroy_symbol = Symbol("destroy-GQ-component");
 
 function registerComponent(socket) {
 	var components = socket.registeredComponents = new Map();
@@ -260,10 +260,12 @@ function registerComponent(socket) {
 				task_id: safe_task_id,
 				protos: protos
 			});
+			done();
 		}, err => {
 			socket.msgError("init-component", {
 				task_id: safe_task_id
 			}, err);
+			done();
 		});
 	});
 
@@ -272,6 +274,7 @@ function registerComponent(socket) {
 	 */
 
 	// 根据safe_task_id获取沙盒环境上下文对象
+	const data_symbol = socket.data_symbol = Symbol("data_symbol");
 	socket.onMsgInfo("order-component", function(data, done) {
 		var info = data.info;
 		var safe_task_id = info.task_id;
@@ -298,7 +301,12 @@ function registerComponent(socket) {
 			if (!order_handle || order_handle.types.indexOf(com_sandbox.type) === -1) {
 				Throw("type", "Can not find " + com_sandbox.type + "'s order: " + order);
 			}
+
+			com_sandbox.com_instance[data_symbol] = data;
+
 			var order_res = yield order_handle.handle(com_sandbox, info.data);
+
+			com_sandbox.com_instance && (com_sandbox.com_instance[data_symbol] = null);
 
 			socket.msgSuccess("order-component", {
 				task_id: safe_task_id,
@@ -391,16 +399,34 @@ function initComponent(socket, is_server) {
 		 * AOP Component
 		 * 对一个返回对象的属性进行重写的辅助函数
 		 */
-		socket.rewriteComponentProxy = function(com_instance_proxy, prop, then) {
+		socket.rewriteOrderComponentProxy = function(com_instance_proxy, prop, cb) {
 			if (com_instance_proxy[com_instance_proxy_symbol]) {
-				const fun_getter_des = Object.getOwnPropertyDescriptor(db_proxy, "collection");
+				const fun_getter_des = Object.getOwnPropertyDescriptor(com_instance_proxy, prop);
+
+				const fun_getter = fun_getter_des.get;
+				fun_getter_des.get = function() {
+					const fun = fun_getter.call(this);
+					return function() {
+						return cb(fun, Array.slice(arguments));
+					}
+				};
+				delete com_instance_proxy[prop];
+				Object.defineProperty(com_instance_proxy, prop, fun_getter_des);
+			}
+		};
+		socket.afterOrderComponentProxy = function(com_instance_proxy, prop, then) {
+			if (com_instance_proxy[com_instance_proxy_symbol]) {
+				const fun_getter_des = Object.getOwnPropertyDescriptor(com_instance_proxy, prop);
+
 				const fun_getter = fun_getter_des.get;
 				fun_getter_des.get = function() {
 					const fun = fun_getter.call(this);
 					return function() {
 						return fun.apply(this, arguments).then(then);
 					}
-				}
+				};
+				delete com_instance_proxy[prop];
+				Object.defineProperty(com_instance_proxy, prop, fun_getter_des);
 			}
 		};
 
@@ -481,6 +507,8 @@ function initComponent(socket, is_server) {
 				});
 				com_instance.protos.properties.forEach(key => {
 					Object.defineProperty(com_instance_proxy, key, {
+						enumerable: true,
+						configurable: true,
 						get: () => {
 							return send_order("get-property", key);
 						},
@@ -492,7 +520,7 @@ function initComponent(socket, is_server) {
 						}
 					});
 				});
-				Object.freeze(com_instance_proxy);
+				// Object.freeze(com_instance_proxy);
 				return com_instance_proxy;
 			});
 		};

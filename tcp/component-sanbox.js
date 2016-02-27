@@ -58,7 +58,7 @@ class ComponentSandboxFactory {
 	get(safe_task_id) {
 		return this.sandboxsMap.get(safe_task_id);
 	}
-	delete(safe_task_id){
+	delete(safe_task_id) {
 		return this.sandboxsMap.delete(safe_task_id);
 	}
 };
@@ -119,6 +119,24 @@ componentSandboxOrders["get-property"] = {
 			res = Promise.resolve(res);
 		}
 		return res;
+	}
+};
+componentSandboxOrders["multi-order"] = {
+	types: ["class", "function", "object"],
+	handle: function(sandbox, orders) {
+		return orders.filterMap(function(order) {
+			if (!order) {
+				return
+			}
+			const order_handle = componentSandboxOrders[order.type];
+			if (!order_handle) {
+				return
+			}
+			if (order_handle.types.indexOf(sandbox.type) === -1) {
+				return
+			}
+			return order_handle.handle(sandbox, order.data);
+		})
 	}
 };
 

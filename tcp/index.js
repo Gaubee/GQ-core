@@ -89,6 +89,7 @@ function createServer(address, callback) {
 		hiddenFlags.add("router-register");
 		hiddenFlags.add("success:init-component");
 		hiddenFlags.add("success:order-component");
+		hiddenFlags.add("success:destroy-component");
 
 	});
 	if (address) {
@@ -123,6 +124,8 @@ function createClient(address, callback) {
 	hiddenFlags.add("success:order-component");
 	hiddenFlags.add("error:order-component");
 	// hiddenFlags.add("order-component");
+	hiddenFlags.add("success:destroy-component");
+	hiddenFlags.add("error:destroy-component");
 
 	return client;
 };
