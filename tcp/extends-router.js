@@ -1,11 +1,13 @@
 // client 拓展 出Router指令
 exports.handleClient = handleClient;
-var Context = require("./Context");
+const Context = require("./Context");
 
 function handleClient(socket) {
 	// 缓存变量
 	const tasks = exports.routerTasks = new Map();
 	const handles = exports.routerHandles = new Map();
+
+	socket.HTTPContext = Context;
 
 	// 默认的响应数据包裹
 	socket.TaskResponObj = require("./ResponObj");

@@ -1,4 +1,4 @@
-var $Object = require("./$.Object");
+require("./$.Object");
 var fs = require("fs");
 var tld = require('tldjs');
 
@@ -471,6 +471,20 @@ function _J简体_to_F繁体(str) {
     return str.join("")
 };
 Tools.F简体_to_F繁体 = _J简体_to_F繁体;
+
+// XSS过滤
+
+const xss = require("xss");
+const whiteList = Object.deepClone(xss.whiteList);
+whiteList.embed = ["type", "class", "pluginspage", "src", "width", "height", "wmode", "play", "loop", "menu", "allowscriptaccess", "allowfullscreen"];
+(whiteList.span || (whiteList.span = [])).push("style");
+Tools.xss = function(html_content, options) {
+    options || (options = {});
+    if (!options.whiteList) {
+        options.whiteList = whiteList;
+    }
+    return xss(html_content || "", options);
+};
 
 
 module.exports = global.Tools = global.$$ = Tools;
