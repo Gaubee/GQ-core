@@ -22,11 +22,15 @@ co.wrap = function(fn, catch_fun) {
 	return createPromise;
 
 	function createPromise() {
-		return co(fn.apply(this, arguments), err => {
-			const args = Array.slice(arguments);
-			args.unshift(err);
-			catch_fun.apply(this, args);
-		});
+		if (catch_fun) {
+			return co(fn.apply(this, arguments), err => {
+				const args = Array.slice(arguments);
+				args.unshift(err);
+				catch_fun.apply(this, args);
+			});
+		} else {
+			return co(fn.apply(this, arguments))
+		}
 	}
 };
 

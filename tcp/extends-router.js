@@ -4,8 +4,8 @@ var Context = require("./Context");
 
 function handleClient(socket) {
 	// 缓存变量
-	var tasks = exports.routerTasks = new Map();
-	var handles = exports.routerHandles = new Map();
+	const tasks = exports.routerTasks = new Map();
+	const handles = exports.routerHandles = new Map();
 
 	// 默认的响应数据包裹
 	socket.TaskResponObj = require("./ResponObj");
@@ -13,23 +13,21 @@ function handleClient(socket) {
 	//响应器
 	socket.onMsgInfo("emit-task", co.wrap(function*(data, done) {
 		try {
-			var task_info = data.info;
-			var handle_id = `[${task_info.method.toLowerCase()}]${task_info.path}`;
+			const task_info = data.info;
+			const handle_id = `[${task_info.method.toLowerCase()}]${task_info.path}`;
 			if (handles.has(handle_id)) {
-				var router_handle = handles.get(handle_id);
+				const router_handle = handles.get(handle_id);
 				yield router_handle.handle.call(new Context(socket, task_info, router_handle.config),
 					task_info, router_handle.config);
+			} else {
+				Throw("ref", "RouterHandle no defined");
 			}
 		} catch (e) {
-			console.error(console.flagHead("emit-task"),
-				e instanceof Object ?
-				(e.toString !== Error.prototype.toString ?
-					e :
-					e.stack /*如果有重写了toString方法，就用重写的，否则直接打印堆栈*/ ) :
-				e);
-			socket.handles.returnData(data_info.task_id, {
+			console.log("data_info.task_id:", task_info);
+			console.flag("emit-task", e);
+			socket.returnData(task_info.task_id, {
 				status: 502,
-				body: socket.TaskResponObj("error", "RouterHandle no defined")
+				body: socket.TaskResponObj("error", e)
 			});
 		}
 		done();
