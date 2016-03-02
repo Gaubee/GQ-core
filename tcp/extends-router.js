@@ -10,7 +10,7 @@ function handleClient(socket) {
 	socket.HTTPContext = Context;
 
 	// 默认的响应数据包裹
-	socket.TaskResponObj = require("./ResponObj");
+	socket.TaskResponObj = require("./responObj");
 
 	//响应器
 	socket.onMsgInfo("emit-task", co.wrap(function*(data, done) {
