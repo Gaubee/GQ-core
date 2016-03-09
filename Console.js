@@ -18,17 +18,20 @@ function Console() {
 	}
 };
 const _console = global.console;
+const _log = _console.log;
+const _console_log = function(args) {
+	process.nextTick(() => {
+		_log.apply(_console, args);
+	});
+};
 
 global.nactive_console = _console;
 global.Console = Console;
 
 Console.replaceColorContent = function(str, replacer) {
 	if (color_flag_reg.test(str)) {
-		var replacer_color_info = replacer.match(color_flag_reg);
-		if (replacer_color_info) {
-			replacer = replacer_color_info[2]
-		}
-		return str.replace(color_flag_reg, "$1" + replacer.replaceAll("$", "$$$$") + "$3")
+		replacer = replacer.replace(color_flag_reg, "$2");
+		return str.trim().replace(color_flag_reg, "$1" + replacer.replaceAll("$", "$$$$") + "$3")
 	}
 	return replacer;
 };
@@ -50,7 +53,7 @@ Console.prototype = {
 	},
 	log: function() {
 		var args = this.addBefore(arguments);
-		_console.log.apply(_console, args);
+		_console_log(args);
 	},
 	info: function() {
 		var args = this.addBefore(arguments);
@@ -74,7 +77,7 @@ Console.prototype = {
 		var args = this.addBefore([util.inspect(object, util._extend({
 			customInspect: false
 		}, options)) + "\n"]);
-		_console.log.apply(_console, args);
+		_console_log(args);
 	},
 	time: function() {
 		var start_date = new Date;
@@ -83,7 +86,7 @@ Console.prototype = {
 
 		this.before.push("┌ (" + start_date.format(this.date_format) + ")");
 		var args = this.addBefore(arguments);
-		_console.log.apply(_console, args);
+		_console_log(args);
 
 		this.before.pop();
 		this.before.push("│ ");
@@ -100,7 +103,7 @@ Console.prototype = {
 		this.before.push("└ (" + end_date.format(this.date_format) + ")");
 		var args = this.addBefore(arguments);
 		args.push(": " + (end_date - start_date) + "ms");
-		_console.log.apply(_console, args);
+		_console_log(args);
 		this.before.pop();
 	},
 	group: function(may_be_flag) {
@@ -121,7 +124,7 @@ Console.prototype = {
 		this.before.push(color_start + "┌ " + color_end);
 		var log_lines = util.format.apply(this, arguments).split("\n");
 		var args = this.addBefore([log_lines.shift()]);
-		_console.log.apply(_console, args);
+		_console_log(args);
 
 		this.before.pop();
 		this.before.push(color_start + "│ " + color_end);
@@ -147,21 +150,25 @@ Console.prototype = {
 				var backup = [];
 				for (var i = start_index + 1; i < before_len; i += 1) {
 					backup.push(this.before[i]);
-					this.before[i] = Console.replaceColorContent(group_flag, this.before[i].replace(/(\s*)│(\s*)/, function(s, before_emp_s, after_emp_s) {
-						return "─".repeat(before_emp_s.length) + "┼" + ((i === before_len - 1) ? after_emp_s : "─".repeat(after_emp_s.length))
-					}));
+					this.before[i] = Console.replaceColorContent(group_flag,
+						this.before[i]
+						.replace(color_flag_reg, "$2") // 删除颜色影响
+						.replace(/(\s*)│(\s*)/, function(s, before_emp_s, after_emp_s) { // 替换空格
+							return "─".repeat(before_emp_s.length) + "┼" + ((i === before_len - 1) ? after_emp_s : "─".repeat(after_emp_s.length))
+						})
+					);
 				}
 				this.before[start_index] = group_flag.replace("│ ", "└─");
 
 				var args = this.addBefore(Array.slice(arguments, 1));
-				_console.log.apply(_console, args);
+				_console_log(args);
 
 				for (i -= 1; i > start_index; i -= 1) {
 					this.before[i] = backup.pop();
 				}
 
 				this.before.splice(start_index, 1);
-				this.before[i] = "  " + this.before[i];
+				this.before[i] = " ".repeat(group_flag.replace(color_flag_reg, "$2").length) + this.before[i];
 				this.beforeSymbol.splice(start_index, 1);
 				return
 			} else {
@@ -174,7 +181,7 @@ Console.prototype = {
 
 		var log_lines = util.format.apply(this, arguments).split("\n");
 		var args = this.addBefore([log_lines.shift()]);
-		_console.log.apply(_console, args);
+		_console_log(args);
 		this.before.pop();
 
 		while (log_lines.length) {
@@ -226,9 +233,9 @@ global.console = global.con = new Console;
 
 // con = new Console;
 // var _3 = con.group("0".red)
-// var _0 = con.group("0".green)
-// var _1 = con.group("1".blue)
-// var _2 = con.group("2");
+// var _0 = con.group("0".blue)
+// var _1 = con.group("1".yellow)
+// var _2 = con.group("2".green);
 // con.log({
 // 	test: "zzz",
 // 	zzz: {
@@ -240,4 +247,18 @@ global.console = global.con = new Console;
 // con.groupEnd(_1, "1")
 // con.groupEnd(_3, "0")
 // con.groupEnd(_2, "2")
-// con.groupEnd("0")
+// var _4 = con.group("4".yellow)
+// var _5 = con.group("5".green)
+// var _6 = con.group("6".red)
+// con.log({
+// 	test: "zzz",
+// 	zzz: {
+// 		cc: [1, 2, 3, 4, 5, 6],
+// 		dd: [1, 2, 3, 4, 5, 6],
+// 	},
+// 	f: () => {}
+// })
+// con.groupEnd(_5, "5")
+// con.groupEnd(_0, "0");
+// con.groupEnd(_4, "4")
+// con.groupEnd(_6, "6");
