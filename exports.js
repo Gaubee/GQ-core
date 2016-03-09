@@ -18,5 +18,6 @@ require("./fileDB");
 require("./$.co");
 require("./$.generator");
 require("./$.Http");
+require("./$.Promise");
 require("./tcp");
 console.flag("init", "加载全局拓展完毕");
