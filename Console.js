@@ -119,11 +119,16 @@ Console.prototype = {
 			}
 		}
 		this.before.push(color_start + "┌ " + color_end);
-		var args = this.addBefore(arguments);
+		var log_lines = util.format.apply(this, arguments).split("\n");
+		var args = this.addBefore([log_lines.shift()]);
 		_console.log.apply(_console, args);
 
 		this.before.pop();
 		this.before.push(color_start + "│ " + color_end);
+
+		while (log_lines.length) {
+			this.log(log_lines.shift());
+		}
 
 		var res_symbol = Symbol(this.beforeSymbol.length);
 		this.beforeSymbol.push(res_symbol);
@@ -167,9 +172,15 @@ Console.prototype = {
 		var group_flag = this.before[this.before.length - 1];
 		this.before[this.before.length - 1] = group_flag.replace("│", "└");
 
-		var args = this.addBefore(arguments);
+		var log_lines = util.format.apply(this, arguments).split("\n");
+		var args = this.addBefore([log_lines.shift()]);
 		_console.log.apply(_console, args);
 		this.before.pop();
+
+		while (log_lines.length) {
+			this.log(log_lines.shift());
+		}
+
 		this.beforeSymbol.pop();
 	},
 	flag: function(flag) {

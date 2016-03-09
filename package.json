@@ -1,6 +1,6 @@
 {
   "name": "gq-core",
-  "version": "1.4.12",
+  "version": "1.4.13",
   "description": "QG项目的公共辅助库，提供了TCP封装以及一整套系统底层接口的拓展",
   "main": "exports.js",
   "scripts": {
