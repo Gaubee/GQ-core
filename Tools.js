@@ -176,9 +176,9 @@ function md5(str) {
     return str;
 };
 //通用密码的加密算法，基于MD5
-function _build_2_md5(pwd_str) {
+function _build_2_md5(pwd_str, _key) {
     //固定字符串
-    var _key = "Gaubee";
+    _key || (_key = "Gaubee");
     //初次不可逆加密
     var md5Hax = md5(pwd_str);
     //双倍长度混合固定字符串再次加密，MD5暴力破解库与密码无法对应

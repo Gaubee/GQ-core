@@ -2,6 +2,7 @@ require("./$.Date");
 require("./$.Array");
 require("./$.Object");
 require("./$.String");
+require("./Tools");
 const util = require("util");
 const colors = require("colors");
 const color_flag_reg = /(\u001b\[\d+m)([\s\S]+?)(\u001b\[\d+m)/; //不以^开头，前面可能有空格
@@ -19,11 +20,20 @@ function Console() {
 };
 const _console = global.console;
 const _log = _console.log;
-const _console_log = function(args) {
-	process.nextTick(() => {
-		_log.apply(_console, args);
-	});
-};
+const gq_config = process.gq_config || {};
+const _console_log = (() => {
+	if (gq_config.sync_log) {
+		return (args) => {
+			_log.apply(_console, args);
+		};
+	} else {
+		return (args) => {
+			process.nextTick(() => {
+				_log.apply(_console, args);
+			});
+		};
+	}
+}());
 
 global.nactive_console = _console;
 global.Console = Console;
@@ -44,6 +54,17 @@ Object.keys(colors.styles).filter(key => {
 });
 
 Console.prototype = {
+	T: (flag) => {
+		const _s = Date.now();
+		console.flag(flag, "START!");
+		return {
+			end(p) {
+				const res = Date.now() - _s;
+				console.flag(flag, p || "", res, "ms");
+				return res;
+			}
+		}
+	},
 	addBefore: function(arr) {
 		arr = Array.slice(arr);
 		var strs = util.format.apply(this, arr);
@@ -51,35 +72,35 @@ Console.prototype = {
 		strs = before_str + strs.replace(/\n/g, '\n' + before_str);
 		return [strs];
 	},
-	log: function() {
+	log: gq_config.silence_log ? $$.noop : function() {
 		var args = this.addBefore(arguments);
 		_console_log(args);
 	},
-	info: function() {
+	info: gq_config.silence_log ? $$.noop : function() {
 		var args = this.addBefore(arguments);
 		_console.info.apply(_console, args);
 	},
-	debug: function() {
+	debug: gq_config.silence_log ? $$.noop : function() {
 		var args = this.addBefore(arguments);
 		_console.debug.apply(_console, args);
 	},
-	warn: function() {
+	warn: gq_config.silence_log ? $$.noop : function() {
 		var args = this.addBefore(arguments);
 		_console.warn.apply(_console, args);
 	},
-	error: function() {
+	error: gq_config.silence_log ? $$.noop : function() {
 		var args = this.addBefore(arguments);
 		_console.error.apply(_console, args);
 	},
-	assert: _console.assert,
-	trace: _console.trace,
-	dir: function(object, options) {
+	assert: gq_config.silence_log ? $$.noop : _console.assert,
+	trace: gq_config.silence_log ? $$.noop : _console.trace,
+	dir: gq_config.silence_log ? $$.noop : function(object, options) {
 		var args = this.addBefore([util.inspect(object, util._extend({
 			customInspect: false
 		}, options)) + "\n"]);
 		_console_log(args);
 	},
-	time: function() {
+	time: gq_config.silence_log ? $$.noop : function() {
 		var start_date = new Date;
 		var time_str = Array.slice(arguments).join(" ");
 		this.timeMap[time_str] = start_date;
@@ -91,7 +112,7 @@ Console.prototype = {
 		this.before.pop();
 		this.before.push("│ ");
 	},
-	timeEnd: function() {
+	timeEnd: gq_config.silence_log ? $$.noop : function() {
 		var end_date = new Date;
 		var time_str = Array.slice(arguments).join(" ");
 		if (!this.timeMap.$hasPro(time_str)) {
@@ -106,7 +127,7 @@ Console.prototype = {
 		_console_log(args);
 		this.before.pop();
 	},
-	group: function(may_be_flag) {
+	group: gq_config.silence_log ? $$.noop : function(may_be_flag) {
 		var color_start = "";
 		var color_end = "";
 		if (util.isSymbol(may_be_flag) && COLOR_MAP.has(may_be_flag)) {
@@ -137,7 +158,7 @@ Console.prototype = {
 		this.beforeSymbol.push(res_symbol);
 		return res_symbol;
 	},
-	groupEnd: function(may_be_symbol) {
+	groupEnd: gq_config.silence_log ? $$.noop : function(may_be_symbol) {
 		/* 交错模式 */
 		if (util.isSymbol(may_be_symbol)) {
 			const start_index = this.beforeSymbol.lastIndexOf(may_be_symbol)
@@ -190,7 +211,7 @@ Console.prototype = {
 
 		this.beforeSymbol.pop();
 	},
-	flag: function(flag) {
+	flag: gq_config.silence_log ? $$.noop : function(flag) {
 		var arr = Array.slice(arguments);
 		arr[0] = ("[" + flag + "]").colorsHead()
 		this.log.apply(this, arr);
@@ -262,3 +283,5 @@ global.console = global.con = new Console;
 // con.groupEnd(_0, "0");
 // con.groupEnd(_4, "4")
 // con.groupEnd(_6, "6");
+
+// console.log('((̵̵́ ̆͒͟˚̩̭ ̆͒)̵̵̀)')

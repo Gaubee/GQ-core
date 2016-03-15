@@ -1,7 +1,8 @@
 require("./$.Function");
 require("./$.Array");
 
-var _co = require("co");
+const _co = require("co");
+const _co_wrap = _co.wrap;
 global.co = function co_pro(gen) {
 	if (arguments.length > 1) {
 		var args = Array.slice(arguments);
@@ -9,9 +10,7 @@ global.co = function co_pro(gen) {
 			var catch_fun = args.pop();
 		}
 		var res = _co.apply(this, args);
-		if (Function.isFunction(catch_fun)) {
-			res = res.catch(catch_fun);
-		}
+		res = res.catch(catch_fun);// 非Function会自己穿透
 	} else {
 		res = _co(gen);
 	}
@@ -19,18 +18,18 @@ global.co = function co_pro(gen) {
 };
 co.wrap = function(fn, catch_fun) {
 	createPromise.__generatorFunction__ = fn;
-	return createPromise;
+	if (Function.isFunction(catch_fun)) {
+		return createPromise;
+	} else {
+		return _co_wrap(fn);
+	}
 
 	function createPromise() {
-		if (catch_fun) {
-			return co(fn.apply(this, arguments), err => {
-				const args = Array.slice(arguments);
-				args.unshift(err);
-				catch_fun.apply(this, args);
-			});
-		} else {
-			return co(fn.apply(this, arguments))
-		}
+		return co.call(this, fn.apply(this, arguments), err => {
+			const args = Array.slice(arguments);
+			args.unshift(err);
+			return catch_fun.apply(this, args);
+		});
 	}
 };
 

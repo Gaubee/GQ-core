@@ -21,8 +21,11 @@ function handleClient(socket) {
 				const router_handle = handles.get(handle_id);
 				yield router_handle.handle.call(new Context(socket, task_info, router_handle.config),
 					task_info, router_handle.config);
-			} else {
-				Throw("ref", "RouterHandle no defined");
+				/*
+				 * 可能会被其它监听器所处理，这时候抛出异常，服务端可能会返回找不到句柄的异常
+				 */
+			// } else {
+			// 	Throw("ref", "RouterHandle no defined");
 			}
 		} catch (e) {
 			console.log("data_info.task_id:", task_info);
