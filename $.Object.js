@@ -1,4 +1,3 @@
-require("./$.Object");
 //添加不可被forin遍历出来的方法或者属性
 Object.defineProperty(Object.prototype, "setUnEnum", {
 	enumerable: false,

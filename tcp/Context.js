@@ -10,6 +10,7 @@ function Context(socket, task_info, register_config) {
 	this.socket = socket;
 	this.task_info = task_info;
 	this.set_cookies = [];
+	this.header = {};
 
 	this.body_type; // TaskResponObj的第一个参数，可空，默认用typeof body
 
@@ -25,7 +26,8 @@ function Context(socket, task_info, register_config) {
 				ctx.body_type || typeof ctx._body,
 				ctx._body
 			),
-			session: ctx.session
+			session: ctx.session,
+			header: Object.keys(ctx.header).length ? ctx.header : null,
 		});
 	});
 };

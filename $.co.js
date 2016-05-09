@@ -1,5 +1,7 @@
 require("./$.Function");
 require("./$.Array");
+const assert = require('assert');
+
 
 const _co = require("co");
 const _co_wrap = _co.wrap;
@@ -10,7 +12,7 @@ global.co = function co_pro(gen) {
 			var catch_fun = args.pop();
 		}
 		var res = _co.apply(this, args);
-		res = res.catch(catch_fun);// 非Function会自己穿透
+		res = res.catch(catch_fun); // 非Function会自己穿透
 	} else {
 		res = _co(gen);
 	}
@@ -32,6 +34,46 @@ co.wrap = function(fn, catch_fun) {
 		});
 	}
 };
+
+
+/**
+ * Wrap a regular callback `fn` as a thunk.
+ *
+ * @param {Function} fn
+ * @return {Function}
+ * @api public
+ */
+
+function thunkify(fn) {
+	assert('function' == typeof fn, 'function required');
+
+	return function() {
+		var args = new Array(arguments.length);
+		var ctx = this;
+
+		for (var i = 0; i < args.length; ++i) {
+			args[i] = arguments[i];
+		}
+
+		return function(done) {
+			var called;
+
+			args.push(function() {
+				if (called) return;
+				called = true;
+				done.apply(null, arguments);
+			});
+
+			try {
+				fn.apply(ctx, args);
+			} catch (err) {
+				done(err);
+			}
+		}
+	}
+};
+
+co.thunkify = co.T = thunkify;
 
 
 var Tools = require("./Tools");

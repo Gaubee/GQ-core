@@ -24,14 +24,14 @@ function handleClient(socket) {
 				/*
 				 * 可能会被其它监听器所处理，这时候抛出异常，服务端可能会返回找不到句柄的异常
 				 */
-			// } else {
-			// 	Throw("ref", "RouterHandle no defined");
+				// } else {
+				// 	Throw("ref", "RouterHandle no defined");
 			}
 		} catch (e) {
-			console.log("data_info.task_id:", task_info);
+			// console.log("data_info.task_id:", task_info);
 			console.flag("emit-task", e);
 			socket.returnData(task_info.task_id, {
-				status: 502,
+				status: 200,
 				body: socket.TaskResponObj("error", e)
 			});
 		}
@@ -117,6 +117,7 @@ function handleClient(socket) {
 						routers = routers.install(socket);
 					}
 					if (Object.isObject(routers)) {
+						console.log(routers)
 						res = res.concat(socket.routerInstaller(routers));
 					} else {
 						console.error(console.flagHead("RouterModule"), file_path, "wrong routers-object")
@@ -130,6 +131,14 @@ function handleClient(socket) {
 		return res;
 	};
 	// 对向型接口安装器
+	_default_register_info = {
+		emit_with: [
+			"query",
+			"params",
+			"form",
+			"session",
+		]
+	};
 	socket.routerInstaller = function RouterInstaller(routers) {
 		var res = [];
 		var prefix = routers.prefix || "";
@@ -145,11 +154,11 @@ function handleClient(socket) {
 						var register_info = router_info_and_handle[0];
 						var router_handle = router_info_and_handle[1];
 					} else {
-						register_info = {};
+						register_info = _default_register_info;
 						router_handle = router_info_and_handle[0];
 					}
 				} else {
-					register_info = {};
+					register_info = _default_register_info;
 					router_handle = router_info_and_handle;
 				}
 

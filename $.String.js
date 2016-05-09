@@ -186,6 +186,11 @@ CJK Unified Ideographs Extension B      20000-2A6DF Rare, historic
 CJK Compatibility Ideographs            F900-FAFF   Duplicates, unifiable variants, corporate characters
 CJK Compatibility Ideographs Supplement 2F800-2FA1F Unifiable variants
  */
+/*
+ * go语言中有更详尽的代码：
+ * RuneCountInString函数： https://golang.org/pkg/unicode/utf8/#RuneCountInString
+ * 源码：https://golang.org/src/unicode/utf8/utf8.go?s=11705:11745#L399
+ */
 var cjk = function(char_code) {
 	return 0x4E00 <= char_code && char_code <= 0x9FFF ||
 		0x3400 <= char_code && char_code <= 0x4DFF ||
