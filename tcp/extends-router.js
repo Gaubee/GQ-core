@@ -154,12 +154,15 @@ function handleClient(socket) {
 						var register_info = router_info_and_handle[0];
 						var router_handle = router_info_and_handle[1];
 					} else {
-						register_info = _default_register_info;
+						register_info = {};
 						router_handle = router_info_and_handle[0];
 					}
 				} else {
-					register_info = _default_register_info;
+					register_info = {};
 					router_handle = router_info_and_handle;
+				}
+				if (!register_info.emit_with) {
+					register_info.emit_with = _default_register_info.emit_with;
 				}
 
 				res.push(socket.registerRouter(method, prefix + path, register_info, router_handle));
